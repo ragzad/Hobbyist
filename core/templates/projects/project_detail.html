@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ project.name }}{% endblock %}
+
+{% block content %}
+    <h1>{{ project.name }}</h1>
+    <p><strong>Status:</strong> {{ project.get_status_display }}</p>
+
+    <hr>
+
+    <h3>Description</h3>
+    <p>{{ project.description|linebreaks }}</p>
+
+    <a href="#">Edit Project</a>
+    <a href="{% url 'projects:project-list' %}">Back to all projects</a>
+{% endblock %}
