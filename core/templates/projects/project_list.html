@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}My Projects{% endblock %}
+
+{% block content %}
+    <h1>My Projects</h1>
+
+    {% for project in projects %}
+        <div>
+            <h2><a href="{% url 'projects:project-detail' project.pk %}">{{ project.name }}</a></h2>
+            <p>Status: {{ project.get_status_display }}</p>
+        </div>
+    {% empty %}
+        <p>You haven't created any projects yet.</p>
+    {% endfor %}
+
+    <a href="#">+ Create New Project</a>
+{% endblock %}
