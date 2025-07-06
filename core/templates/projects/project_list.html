@@ -14,5 +14,5 @@
         <p>You haven't created any projects yet.</p>
     {% endfor %}
 
-    <a href="#">+ Create New Project</a>
+    <a href="{% url 'projects:project-create' %}">+ Create New Project</a>
 {% endblock %}
