@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Upgrade to Premium{% endblock %}
+
+{% block content %}
+  <h1>Upgrade to Premium</h1>
+  <p>Get access to exclusive features like photo galleries for just a one-time payment of £5.00!</p>
+
+  <form action="{% url 'payments:create-checkout-session' %}" method="POST">
+    {% csrf_token %}
+    <button type="submit">Pay with Stripe</button>
+  </form>
+{% endblock %}

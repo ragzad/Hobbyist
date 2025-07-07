@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block title %}Payment Successful{% endblock %}
+{% block content %}
+  <h1>Thank You!</h1>
+  <p>Your payment was successful and your account has been upgraded to Premium.</p>
+  <a href="{% url 'projects:project-list' %}">Go to your Dashboard</a>
+{% endblock %}
