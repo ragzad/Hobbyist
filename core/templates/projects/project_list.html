@@ -3,16 +3,29 @@
 {% block title %}My Projects{% endblock %}
 
 {% block content %}
-    <h1>My Projects</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>My Projects</h1>
+        <a href="{% url 'projects:project-create' %}" class="btn btn-primary">+ Create New Project</a>
+    </div>
 
+    <div class="row">
     {% for project in projects %}
-        <div>
-            <h2><a href="{% url 'projects:project-detail' project.pk %}">{{ project.name }}</a></h2>
-            <p>Status: {{ project.get_status_display }}</p>
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ project.name }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ project.get_status_display }}</h6>
+                    <p class="card-text">{{ project.description|truncatewords:20 }}</p>
+                    <a href="{% url 'projects:project-detail' project.pk %}" class="btn btn-secondary">View Details</a>
+                </div>
+            </div>
         </div>
     {% empty %}
-        <p>You haven't created any projects yet.</p>
+        <div class="col">
+            <div class="alert alert-info" role="alert">
+                You haven't created any projects yet. Click the button above to get started!
+            </div>
+        </div>
     {% endfor %}
-
-    <a href="{% url 'projects:project-create' %}">+ Create New Project</a>
+    </div>
 {% endblock %}
