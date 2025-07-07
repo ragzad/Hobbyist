@@ -12,5 +12,7 @@
     <p>{{ project.description|linebreaks }}</p>
 
     <a href="{% url 'projects:project-update' project.pk %}">Edit Project</a>
+    <a href="{% url 'projects:project-delete' project.pk %}" style="color: red;">Delete Project</a> {# Add this link #}
+    <br>
     <a href="{% url 'projects:project-list' %}">Back to all projects</a>
 {% endblock %}
