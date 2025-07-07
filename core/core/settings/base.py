@@ -16,7 +16,8 @@ from pathlib import Path
 
 # Initialise django-environ
 env = environ.Env()
-environ.Env.read_env()
+# Tell it to read the .env file in the root directory
+environ.Env.read_env(os.path.join('.env'))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

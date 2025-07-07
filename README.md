@@ -147,9 +147,8 @@ To run the full test suite, use the following command:
 ```bash
 python manage.py test
 
-## 🧪 Testing Log
-
 | Function Implemented | Test Undertook | Screenshots |
 | :--- | :--- | :--- |
-| **User Login** | 1. Navigated to the `/accounts/login/` page. <br> 2. Entered valid superuser credentials. <br> 3. Verified successful login and redirection to the project dashboard. <br> 4. Attempted login with an incorrect password. <br> 5. Verified that an error message was displayed and the user was not logged in. | ![Login Page](https://i.imgur.com/login-placeholder.png) |
+| **User Login & Registration** | 1. **Sign Up:** Navigated to `/accounts/signup/`, created a new user, and verified successful redirection to the login page. <br> 2. **Login:** Logged in with the new user credentials and verified redirection to the project dashboard. <br> 3. **Logout:** Clicked the logout button and verified successful redirection back to the login page. <br> 4. **Access Control:** While logged out, attempted to access `/projects/` and was correctly redirected to the login page. | ![Login/Signup Flow](https://i.imgur.com/auth-flow-placeholder.png) |
+| **Stripe Payment Checkout** | 1. Navigated to the `/upgrade/` page. <br> 2. Clicked the "Pay with Stripe" button. <br> 3. Verified redirection to the official Stripe checkout page. <br> 4. Used Stripe's dummy card number (4242 4242 4242 4242) to simulate a successful payment. <br> 5. Verified redirection to the `/upgrade/success/` page after payment. <br> 6. Tested the cancel flow by closing the Stripe page and verifying redirection to the `/upgrade/cancel/` page. | ![Stripe Checkout Flow](https://i.imgur.com/stripe-placeholder.png) |
 | | | |
