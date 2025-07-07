@@ -146,3 +146,10 @@ I used Django's built-in testing framework to write unit tests for the applicati
 To run the full test suite, use the following command:
 ```bash
 python manage.py test
+
+## 🧪 Testing Log
+
+| Function Implemented | Test Undertook | Screenshots |
+| :--- | :--- | :--- |
+| **User Login** | 1. Navigated to the `/accounts/login/` page. <br> 2. Entered valid superuser credentials. <br> 3. Verified successful login and redirection to the project dashboard. <br> 4. Attempted login with an incorrect password. <br> 5. Verified that an error message was displayed and the user was not logged in. | ![Login Page](https://i.imgur.com/login-placeholder.png) |
+| | | |
