@@ -149,3 +149,24 @@ I used Django's built-in testing framework to write unit tests for the applicati
 | **Stripe Payment Checkout** | 1. Navigated to the `/upgrade/` page and clicked the "Pay with Stripe" button. <br> 2. Verified redirection to the official Stripe checkout page. <br> 3. Used Stripe's dummy card number (4242...) to simulate a successful payment. <br> 4. Verified redirection to the `/upgrade/success/` page after payment. <br> 5. Tested the cancel flow and verified redirection to the `/upgrade/cancel/` page. | ![Stripe Checkout Flow](https://i.imgur.com/stripe-placeholder.png) |
 | **Premium Feature: Photo Upload** | 1. **Non-Premium User:** Verified that a standard user sees the "Upgrade to Premium" link and not the upload form. <br> 2. **Premium User:** Logged in as a premium user and navigated to a project detail page. <br> 3. **Form Visibility:** Verified that the photo upload form is visible. <br> 4. **File Upload:** Selected a valid image file and clicked "Upload Photo". <br> 5. **Verification:** Confirmed that the page reloaded and the new photo was displayed in the project gallery. | ![Photo Upload Form & Gallery](https://i.imgur.com/gallery-placeholder.png) |
 | | | |
+
+## 🧪 Automated Testing
+
+To ensure the application is robust and to prevent future changes from breaking existing functionality, I have implemented automated tests using Django's built-in testing framework.
+
+These tests are designed to run automatically and verify that the core components of the application behave as expected under different scenarios.
+
+### Tests Implemented
+
+The initial test suite for the `projects` app includes the following checks:
+
+* **Model `__str__` Method:** A test to confirm that the `Project` model's string representation (`__str__` method) correctly returns the project's name. This is important for a clean display in the Django admin and for debugging.
+* **View Access for Logged-In Users:** A test that simulates a logged-in user accessing the main project list page (`/projects/`). It verifies that the page loads successfully (returns an HTTP 200 OK status code) and that it uses the correct template (`projects/project_list.html`).
+* **View Access for Logged-Out Users:** A critical security test that simulates a logged-out user attempting to access the project list page. It verifies that the user is correctly redirected (returns an HTTP 302 status code) to the login page, protecting user data.
+
+### Running the Tests
+
+To run the full test suite, execute the following command from the project's root directory:
+
+```bash
+python manage.py test
