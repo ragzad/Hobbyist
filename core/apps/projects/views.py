@@ -4,6 +4,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from .models import Project, ProjectPhoto
 from .forms import ProjectForm, PhotoUploadForm
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
 
 # --- Project List View ---
 class ProjectListView(LoginRequiredMixin, ListView):
@@ -42,6 +43,7 @@ class ProjectCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
+        messages.success(self.request, "Project created successfully!") # Add this message
         return super().form_valid(form)
 
 # --- Project Update View ---

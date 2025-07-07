@@ -3,49 +3,48 @@
 {% block title %}{{ project.name }}{% endblock %}
 
 {% block content %}
-    <h1>{{ project.name }}</h1>
-    <p><strong>Status:</strong> {{ project.get_status_display }}</p>
-
-    <hr>
-
-    <h3>Description</h3>
-    <p>{{ project.description|linebreaks }}</p>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{{ project.name }}</h1>
+        <div>
+            <a href="{% url 'projects:project-update' project.pk %}" class="btn btn-secondary">Edit</a>
+            <a href="{% url 'projects:project-delete' project.pk %}" class="btn btn-danger">Delete</a>
+        </div>
+    </div>
     
-    {# --- NEW PREMIUM SECTION --- #}
-     {% if is_premium_user %}
-        <hr>
+    <div class="card mb-4">
+        <div class="card-header">
+            <strong>Status:</strong> {{ project.get_status_display }}
+        </div>
+        <div class="card-body">
+            <p class="card-text">{{ project.description|linebreaks }}</p>
+        </div>
+    </div>
+
+    {# --- PREMIUM SECTION --- #}
+    {% if is_premium_user %}
         <h3>Project Gallery (Premium)</h3>
-        
-        {% for photo in project.photos.all %}
-            <div style="display: inline-block; margin: 10px;">
-                <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" width="200">
-                <p>{{ photo.caption }}</p>
-            </div>
-        {% empty %}
-            <p>No photos yet.</p>
-        {% endfor %}
+        <div class="row">
+            {% for photo in project.photos.all %}
+                <div class="col-md-3 mb-3">
+                    <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="img-fluid rounded">
+                    <p class="mt-1"><small>{{ photo.caption }}</small></p>
+                </div>
+            {% empty %}
+                <p>No photos yet.</p>
+            {% endfor %}
+        </div>
 
         <hr>
         <h4>Upload a new photo:</h4>
-        {# NOTE: The 'enctype' is crucial for file uploads #}
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            {{ photo_form.as_p }}
-            <button type="submit">Upload Photo</button>
+            {{ photo_form.as_p }} {# You can style this form like in suggestion #1 #}
+            <button type="submit" class="btn btn-primary">Upload Photo</button>
         </form>
-
     {% else %}
-        <hr>
-        <p>
-            <a href="{% url 'payments:payment-page' %}">Upgrade to Premium</a> to add a photo gallery!
-        </p>
+        <div class="alert alert-info">
+            <a href="{% url 'payments:payment-page' %}" class="alert-link">Upgrade to Premium</a> to add a photo gallery!
+        </div>
     {% endif %}
 
-    {# --- END PREMIUM SECTION --- #}
-
-    <hr>
-    <a href="{% url 'projects:project-update' project.pk %}">Edit Project</a>
-    <a href="{% url 'projects:project-delete' project.pk %}" style="color: red;">Delete Project</a>
-    <br>
-    <a href="{% url 'projects:project-list' %}">Back to all projects</a>
 {% endblock %}
