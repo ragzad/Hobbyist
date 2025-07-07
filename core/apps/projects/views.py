@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from .models import Project
+from .models import Project, ProjectPhoto
 from .forms import ProjectForm 
 from django.contrib.auth.mixins import LoginRequiredMixin
 
@@ -18,12 +18,20 @@ class ProjectListView(LoginRequiredMixin, ListView):
 # A view to display the details of a single project
 class ProjectDetailView(LoginRequiredMixin, DetailView):
     model = Project
-    template_name = 'projects/project_detail.html' 
+    template_name = 'projects/project_detail.html'
     context_object_name = 'project'
 
     def get_queryset(self):
         # This ensures a user can only see the detail page of their own project
         return Project.objects.filter(owner=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        # This method lets us add extra context to the template
+        context = super().get_context_data(**kwargs)
+        # Check if the user's profile exists and is premium
+        is_premium = hasattr(self.request.user, 'profile') and self.request.user.profile.is_premium
+        context['is_premium_user'] = is_premium
+        return context
     
     # A view to create a new project
 class ProjectCreateView(LoginRequiredMixin, CreateView):
