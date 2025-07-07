@@ -152,17 +152,32 @@ I used Django's built-in testing framework to write unit tests for the applicati
 
 ## 🧪 Automated Testing
 
-To ensure the application is robust and to prevent future changes from breaking existing functionality, I have implemented automated tests using Django's built-in testing framework.
+To ensure the application is robust and to prevent future changes from breaking existing functionality, I have implemented a suite of automated tests using Django's built-in testing framework.
 
-These tests are designed to run automatically and verify that the core components of the application behave as expected under different scenarios.
+These tests are designed to run automatically and verify that the core components of the application behave as expected under different scenarios, including crucial security checks.
 
 ### Tests Implemented
 
-The initial test suite for the `projects` app includes the following checks:
+The test suite for the `projects` app has been expanded to cover the full CRUD (Create, Read, Update, Delete) lifecycle and key security concerns:
 
-* **Model `__str__` Method:** A test to confirm that the `Project` model's string representation (`__str__` method) correctly returns the project's name. This is important for a clean display in the Django admin and for debugging.
-* **View Access for Logged-In Users:** A test that simulates a logged-in user accessing the main project list page (`/projects/`). It verifies that the page loads successfully (returns an HTTP 200 OK status code) and that it uses the correct template (`projects/project_list.html`).
-* **View Access for Logged-Out Users:** A critical security test that simulates a logged-out user attempting to access the project list page. It verifies that the user is correctly redirected (returns an HTTP 302 status code) to the login page, protecting user data.
+* **Model Representation:** Confirms that the `Project` model's string representation (`__str__`) works correctly.
+* **List View Logic:**
+    * Verifies that a logged-in user can see their own projects on the dashboard.
+    * Confirms that logged-out users are correctly redirected to the login page.
+* **Detail View Security:** A key security test that ensures a user can access the detail page for their own project but receives a **404 Not Found** error if they try to access a project belonging to another user.
+* **Create View Functionality:** Tests that a logged-in user can successfully submit the form to create a new project and that the new project is correctly saved to the database.
+
+### The Testing Process
+
+Initially, a test for the "Create View" failed because the test was not providing all the required data to the form. This is a perfect example of how testing helps catch bugs early.
+
+The initial test run showed a failure, as it did not account for the `status` field being required.
+
+![Initial Failing Test Run](Screenshots/Test2.png)
+
+After identifying the missing field in the test's payload, the test was amended.
+
+![Amended Passing Test Run](Screenshots/Test2Amended.png)
 
 ### Running the Tests
 
