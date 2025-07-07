@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Project
 from .forms import ProjectForm 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -38,3 +38,22 @@ class ProjectCreateView(LoginRequiredMixin, CreateView):
         # It should return an HttpResponse.
         form.instance.owner = self.request.user # Assign the logged-in user as the owner
         return super().form_valid(form)
+    
+class ProjectUpdateView(LoginRequiredMixin, UpdateView):
+    model = Project
+    form_class = ProjectForm
+    template_name = 'projects/project_form.html'
+    success_url = reverse_lazy('projects:project-list')
+
+    def get_queryset(self):
+        # Ensure users can only update their own projects.
+        return Project.objects.filter(owner=self.request.user)
+    
+class ProjectDeleteView(LoginRequiredMixin, DeleteView):
+    model = Project
+    template_name = 'projects/project_confirm_delete.html' 
+    success_url = reverse_lazy('projects:project-list')
+
+    def get_queryset(self):
+        # Ensure users can only delete their own projects.
+        return Project.objects.filter(owner=self.request.user)
