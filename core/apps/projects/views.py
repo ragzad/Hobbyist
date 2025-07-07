@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from .models import Project, ProjectPhoto
+from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
+from .models import Project, ProjectPhoto, Profile
 from .forms import ProjectForm, PhotoUploadForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
+
+
 
 # --- Project List View ---
 class ProjectListView(LoginRequiredMixin, ListView):
@@ -27,11 +29,16 @@ class ProjectDetailView(LoginRequiredMixin, DetailView):
         return Project.objects.filter(owner=self.request.user)
 
     def get_context_data(self, **kwargs):
-        # This method lets us add extra context to the template
         context = super().get_context_data(**kwargs)
-        # Check if the user's profile exists and is premium
-        is_premium = hasattr(self.request.user, 'profile') and self.request.user.profile.is_premium
+        
+        # FIX: A more robust way to check for premium status.
+        # This checks if a Profile exists for this user AND that its is_premium flag is True.
+        # It will not crash if a Profile object doesn't exist; it will simply be False.
+        is_premium = Profile.objects.filter(user=self.request.user, is_premium=True).exists()
+
         context['is_premium_user'] = is_premium
+        if is_premium:
+            context['photo_form'] = PhotoUploadForm()
         return context
     
     # A view to create a new project
@@ -97,3 +104,6 @@ class ProjectDetailView(LoginRequiredMixin, DetailView):
             photo.save()
             
         return redirect('projects:project-detail', pk=self.get_object().pk)
+    
+class HomeView(TemplateView):
+    template_name = 'home.html'
