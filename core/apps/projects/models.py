@@ -50,3 +50,12 @@ class InventoryItem(models.Model):
 
     def __str__(self):
         return self.name
+    
+    class ProjectPhoto(models.Model):
+        project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='photos')
+        image = models.ImageField(upload_to='project_photos/')
+        caption = models.CharField(max_length=255, blank=True)
+        uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Photo for {self.project.name}"

@@ -10,9 +10,33 @@
 
     <h3>Description</h3>
     <p>{{ project.description|linebreaks }}</p>
+    
+    {# --- NEW PREMIUM SECTION --- #}
+    {% if is_premium_user %}
+        <hr>
+        <h3>Project Gallery (Premium)</h3>
+        
+        {# Display existing photos #}
+        {% for photo in project.photos.all %}
+            <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" width="200">
+        {% empty %}
+            <p>No photos yet.</p>
+        {% endfor %}
 
+        {# In a future step, we would add a photo upload form here #}
+        <p><em>Photo upload form coming soon...</em></p>
+
+    {% else %}
+        <hr>
+        <p>
+            <a href="{% url 'payments:payment-page' %}">Upgrade to Premium</a> to add a photo gallery!
+        </p>
+    {% endif %}
+    {# --- END PREMIUM SECTION --- #}
+
+    <hr>
     <a href="{% url 'projects:project-update' project.pk %}">Edit Project</a>
-    <a href="{% url 'projects:project-delete' project.pk %}" style="color: red;">Delete Project</a> {# Add this link #}
+    <a href="{% url 'projects:project-delete' project.pk %}" style="color: red;">Delete Project</a>
     <br>
     <a href="{% url 'projects:project-list' %}">Back to all projects</a>
 {% endblock %}
