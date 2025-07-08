@@ -48,6 +48,13 @@ class ProjectCreateView(LoginRequiredMixin, CreateView):
     template_name = 'projects/project_form.html'
     success_url = reverse_lazy('projects:project-list')
 
+    class ProjectCreateView(LoginRequiredMixin, CreateView):
+        def get_form_kwargs(self):
+            # This passes the 'user' object to the form's __init__ method
+            kwargs = super().get_form_kwargs()
+            kwargs['user'] = self.request.user
+            return kwargs
+
     def form_valid(self, form):
         form.instance.owner = self.request.user
         messages.success(self.request, "Project created successfully!") # Add this message
@@ -59,6 +66,11 @@ class ProjectUpdateView(LoginRequiredMixin, UpdateView):
     form_class = ProjectForm
     template_name = 'projects/project_form.html'
     success_url = reverse_lazy('projects:project-list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def get_queryset(self):
         # Ensure users can only update their own projects.

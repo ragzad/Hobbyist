@@ -21,6 +21,8 @@ class Project(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='NOT_STARTED')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    required_inventory = models.ManyToManyField('InventoryItem', blank=True, related_name='projects')
+
 
     def __str__(self):
         return self.name
