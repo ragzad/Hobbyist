@@ -17,4 +17,9 @@ urlpatterns = [
     path('inventory/add/', views.InventoryItemCreateView.as_view(), name='inventory-create'),
     path('inventory/<int:pk>/update/', views.InventoryItemUpdateView.as_view(), name='inventory-update'),
     path('inventory/<int:pk>/delete/', views.InventoryItemDeleteView.as_view(), name='inventory-delete'),
+
+    # --- TASK URLS ---
+    path('task/<int:pk>/update/', views.TaskUpdateView.as_view(), name='task-update'),
+    path('task/<int:pk>/delete/', views.TaskDeleteView.as_view(), name='task-delete'),
+    path('task/move/', views.move_task, name='task-move'),
 ]

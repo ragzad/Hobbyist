@@ -1,10 +1,13 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.contrib import messages
+from django.db.models import Sum, F, Q
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
-from .models import Profile, Project, InventoryItem, ProjectPhoto
-from .forms import ProjectForm, PhotoUploadForm, InventoryItemForm
+from .models import Profile, Project, InventoryItem, ProjectPhoto, Category, Task
+from .forms import ProjectForm, PhotoUploadForm, InventoryItemForm, TaskForm
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponse
+from django.views.decorators.http import require_POST
 
 # --- Homepage View ---
 class HomeView(TemplateView):
@@ -17,7 +20,46 @@ class ProjectListView(LoginRequiredMixin, ListView):
     context_object_name = 'projects'
 
     def get_queryset(self):
+        queryset = super().get_queryset().filter(owner=self.request.user)
+        query = self.request.GET.get('q')
+        if query:
+            queryset = queryset.filter(Q(name__icontains=query) | Q(description__icontains=query))
+        return queryset
+
+class ProjectDetailView(LoginRequiredMixin, DetailView):
+    model = Project
+    template_name = 'projects/project_detail.html'
+    context_object_name = 'project'
+
+    def get_queryset(self):
         return Project.objects.filter(owner=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        project = self.get_object()
+        context['tasks_todo'] = project.tasks.filter(status='TODO')
+        context['tasks_inprogress'] = project.tasks.filter(status='INPROGRESS')
+        context['tasks_done'] = project.tasks.filter(status='DONE')
+        context['task_form'] = TaskForm()
+        total_cost_data = project.required_inventory.aggregate(total=Sum('cost'))
+        total_cost = total_cost_data.get('total') or 0
+        context['total_project_cost'] = total_cost
+        is_premium = Profile.objects.filter(user=self.request.user, is_premium=True).exists()
+        context['is_premium_user'] = is_premium
+        if is_premium:
+            context['photo_form'] = PhotoUploadForm()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.project = self.get_object()
+            task.save()
+            messages.success(request, "New task added to 'To Do'.")
+        else:
+            messages.error(request, "There was an error adding your task.")
+        return redirect('projects:project-detail', pk=self.get_object().pk)
 
 class ProjectCreateView(LoginRequiredMixin, CreateView):
     model = Project
@@ -53,34 +95,6 @@ class ProjectDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_queryset(self):
         return Project.objects.filter(owner=self.request.user)
-
-class ProjectDetailView(LoginRequiredMixin, DetailView):
-    model = Project
-    template_name = 'projects/project_detail.html'
-    context_object_name = 'project'
-
-    def get_queryset(self):
-        return Project.objects.filter(owner=self.request.user)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        is_premium = Profile.objects.filter(user=self.request.user, is_premium=True).exists()
-        context['is_premium_user'] = is_premium
-        if is_premium:
-            context['photo_form'] = PhotoUploadForm()
-        return context
-
-    def post(self, request, *args, **kwargs):
-        is_premium = Profile.objects.filter(user=self.request.user, is_premium=True).exists()
-        if not is_premium:
-            return redirect('projects:project-list')
-
-        form = PhotoUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            photo = form.save(commit=False)
-            photo.project = self.get_object()
-            photo.save()
-        return redirect('projects:project-detail', pk=self.get_object().pk)
 
 # --- INVENTORY VIEWS ---
 class InventoryListView(LoginRequiredMixin, ListView):
@@ -118,9 +132,6 @@ class InventoryItemUpdateView(LoginRequiredMixin, UpdateView):
         kwargs['user'] = self.request.user
         return kwargs
 
-    def get_queryset(self):
-        return InventoryItem.objects.filter(owner=self.request.user)
-
 class InventoryItemDeleteView(LoginRequiredMixin, DeleteView):
     model = InventoryItem
     template_name = 'inventory/inventory_confirm_delete.html'
@@ -128,3 +139,41 @@ class InventoryItemDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_queryset(self):
         return InventoryItem.objects.filter(owner=self.request.user)
+
+# --- TASK VIEWS ---
+class TaskUpdateView(LoginRequiredMixin, UpdateView):
+    model = Task
+    form_class = TaskForm
+    template_name = 'tasks/task_form.html'
+
+    def get_queryset(self):
+        return Task.objects.filter(project__owner=self.request.user)
+
+    def get_success_url(self):
+        return reverse_lazy('projects:project-detail', kwargs={'pk': self.object.project.pk})
+
+class TaskDeleteView(LoginRequiredMixin, DeleteView):
+    model = Task
+    template_name = 'tasks/task_confirm_delete.html'
+
+    def get_queryset(self):
+        return Task.objects.filter(project__owner=self.request.user)
+
+    def get_success_url(self):
+        return reverse_lazy('projects:project-detail', kwargs={'pk': self.object.project.pk})
+    
+@require_POST
+def move_task(request):
+    # This view is called by htmx when a task is moved
+    task_id = request.POST.get('task_id')
+    new_status = request.POST.get('new_status')
+    
+    try:
+        task = Task.objects.get(pk=task_id, project__owner=request.user)
+        task.status = new_status
+        task.save()
+        return HttpResponse(status=200) # Success
+    except Task.DoesNotExist:
+        return HttpResponse(status=404) # Not Found
+    except Exception as e:
+        return HttpResponse(status=500) # Server Error
