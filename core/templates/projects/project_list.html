@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}My Projects{% endblock %}
 
 {% block content %}
+
     <div class="p-4 mb-4 bg-white rounded-3 shadow-sm">
         <div class="container-fluid py-2">
             <h2 class="display-6 fw-bold">Welcome back, {{ user.username }}!</h2>
@@ -19,10 +22,20 @@
         <div class="col-md-4 mb-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">{{ project.name }}</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">{{ project.get_status_display }}</h6>
-                    <p class="card-text">{{ project.description|truncatewords:20 }}</p>
-                    <a href="{% url 'projects:project-detail' project.pk %}" class="btn btn-secondary"><i class="bi bi-eye"></i> View Details</a>
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h5 class="card-title">{{ project.name }}</h5>
+                        
+                        {% if project.status == 'COMPLETED' %}
+                            <span class="badge rounded-pill bg-success">Completed</span>
+                        {% elif project.status == 'IN_PROGRESS' %}
+                            <span class="badge rounded-pill bg-warning text-dark">In Progress</span>
+                        {% else %}
+                            <span class="badge rounded-pill bg-secondary">Not Started</span>
+                        {% endif %}
+                    </div>
+
+                    <p class="card-text text-muted">{{ project.description|truncatewords:20 }}</p>
+                    <a href="{% url 'projects:project-detail' project.pk %}" class="btn btn-outline-primary"><i class="bi bi-eye"></i> View Project</a>
                 </div>
             </div>
         </div>
@@ -37,21 +50,6 @@
                 </a>
             </div>
         </div>
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start">
-                <h5 class="card-title">{{ project.name }}</h5>
-                
-                {# --- NEW STATUS BADGE --- #}
-                {% if project.status == 'COMPLETED' %}
-                    <span class="badge rounded-pill bg-success">Completed</span>
-                {% elif project.status == 'IN_PROGRESS' %}
-                    <span class="badge rounded-pill bg-warning text-dark">In Progress</span>
-                {% else %}
-                    <span class="badge rounded-pill bg-secondary">Not Started</span>
-                {% endif %}
-            </div>
-        <p class="card-text text-muted">{{ project.description|truncatewords:20 }}</p>
-        <a href="{% url 'projects:project-detail' project.pk %}" class="btn btn-outline-primary"><i class="bi bi-eye"></i> View Project</a>
-        
-    {% endfor %}    </div>
+    {% endfor %}
+    </div>
 {% endblock %}

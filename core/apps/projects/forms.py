@@ -1,11 +1,11 @@
 from django import forms
-# Make sure Project, InventoryItem, and ProjectPhoto are all imported
-from .models import Project, InventoryItem, ProjectPhoto 
+from .models import Project, InventoryItem, ProjectPhoto
 
+# --- PROJECT FORM ---
 class ProjectForm(forms.ModelForm):
     # This creates a field with checkboxes for all of the user's inventory items
     required_inventory = forms.ModelMultipleChoiceField(
-        queryset=InventoryItem.objects.none(), # We'll set the real queryset in the view
+        queryset=InventoryItem.objects.none(),
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
@@ -23,7 +23,14 @@ class ProjectForm(forms.ModelForm):
             # This is the key part: it makes sure the user only sees their own inventory items as choices
             self.fields['required_inventory'].queryset = InventoryItem.objects.filter(owner=user)
 
+# --- PHOTO UPLOAD FORM ---
 class PhotoUploadForm(forms.ModelForm):
     class Meta:
         model = ProjectPhoto
         fields = ['image', 'caption']
+
+# --- INVENTORY ITEM FORM ---
+class InventoryItemForm(forms.ModelForm):
+    class Meta:
+        model = InventoryItem
+        fields = ['name', 'category', 'quantity', 'unit_of_measurement', 'notes']

@@ -28,10 +28,10 @@
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         {% if user.is_authenticated %}
                             <li class="nav-item">
-                                <a class="nav-link {% if request.resolver_match.url_name == 'project-list' %}active{% endif %}" href="{% url 'projects:project-list' %}">My Projects</a>
+                                <a class="nav-link {% if 'project-list' in request.path or 'project-detail' in request.path %}active{% endif %}" href="{% url 'projects:project-list' %}">My Projects</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="#">Inventory</a>
+                                <a class="nav-link {% if 'inventory' in request.path %}active{% endif %}" href="{% url 'projects:inventory-list' %}">Inventory</a>
                             </li>
                         {% endif %}
                     </ul>

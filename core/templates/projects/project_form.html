@@ -14,35 +14,37 @@
                     <div class="mb-3">
                         <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
 
+                        {# --- This block handles ALL field types --- #}
+
+                        {# 1. Check for the ManyToMany checkbox widget #}
                         {% if field.name == 'required_inventory' %}
-                            <div class="form-check">
+                            <div class="form-check-container p-2 border rounded" style="max-height: 200px; overflow-y: auto;">
                                 {% for choice in field %}
                                     <div class="form-check">
                                         {{ choice.tag }}
-                                        <label class="form-check-label" for="{{ choice.id_for_label }}">
-                                            {{ choice.choice_label }}
-                                        </label>
+                                        <label class="form-check-label" for="{{ choice.id_for_label }}">{{ choice.choice_label }}</label>
                                     </div>
                                 {% endfor %}
                             </div>
-                        {% else %}
-                        {# FIX: Check for the field name to render a textarea #}
-                        {% if field.name == 'description' %}
-                            <textarea name="{{ field.name }}" id="{{ field.id_for_label }}" class="form-control" rows="5">{{ field.value|default_if_none:'' }}</textarea>
 
-                        {# FIX: Check for the field widget type to render a select #}
-                        {% elif field.field.widget.input_type == 'select' %}
+                        {# 2. Check if the field is a dropdown/select #}
+                        {% elif 'select' in field.field.widget.template_name %}
                             <select name="{{ field.name }}" id="{{ field.id_for_label }}" class="form-select">
                                 {% for value, text in field.field.choices %}
                                     <option value="{{ value }}" {% if field.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ text }}</option>
                                 {% endfor %}
                             </select>
 
-                        {# FIX: Handle all other standard text inputs #}
+                        {# 3. Check if the field is a textarea #}
+                        {% elif 'textarea' in field.field.widget.template_name %}
+                            <textarea name="{{ field.name }}" id="{{ field.id_for_label }}" class="form-control" rows="5">{{ field.value|default_if_none:'' }}</textarea>
+
+                        {# 4. Handle all other standard text inputs #}
                         {% else %}
-                            <input type="text" class="form-control" name="{{ field.name }}" id="{{ field.id_for_label }}" value="{{ field.value|default_if_none:'' }}">
+                            <input type="{{ field.field.widget.input_type }}" class="form-control" name="{{ field.name }}" id="{{ field.id_for_label }}" value="{{ field.value|default_if_none:'' }}">
                         {% endif %}
                         
+                        {# --- Display field errors --- #}
                         {% if field.errors %}
                             <div class="alert alert-danger mt-2">
                                 {{ field.errors|striptags }}
@@ -50,11 +52,11 @@
                         {% endif %}
                     </div>
                 {% endfor %}
-                
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-primary btn-lg">Save Changes</button>
-                </div>
-            </form>
+            
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg">Save Project</button>
+            </div>
+        </form>
         </div>
     </div>
 </div>
