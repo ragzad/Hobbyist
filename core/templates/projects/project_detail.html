@@ -18,6 +18,18 @@
         <div class="card-body">
             <p class="card-text">{{ project.description|linebreaks }}</p>
         </div>
+        <div class="card mb-4">
+        <div class="card-header">
+            <strong><i class="bi bi-box-seam"></i> Required Inventory</strong>
+        </div>
+            <ul class="list-group list-group-flush">
+                {% for item in project.required_inventory.all %}
+                    <li class="list-group-item">{{ item.name }}</li>
+                {% empty %}
+                    <li class="list-group-item text-muted">No specific inventory items have been linked to this project.</li>
+                {% endfor %}
+            </ul>
+</div>
     </div>
 
     {# --- PREMIUM SECTION --- #}
