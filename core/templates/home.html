@@ -1,14 +1,50 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Welcome to Hobby Tracker{% endblock %}
 
 {% block content %}
-<div class="p-5 mb-4 bg-light rounded-3 text-center">
-    <div class="container-fluid py-5">
-        <h1 class="display-5 fw-bold">Hobby Tracker</h1>
-        <p class="fs-4">The best place to document your passion projects, manage your inventory, and showcase your craft.</p>
-        <a href="{% url 'signup' %}" class="btn btn-primary btn-lg">Get Started for Free</a>
-        <a href="{% url 'login' %}" class="btn btn-secondary btn-lg">Log In</a>
+{# --- 1. Main Hero Section --- #}
+<div class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content text-center">
+        <div class="hero-text-box p-4">
+            <h1 class="display-4 fw-bold">Your Digital Workbench</h1>
+            <p class="fs-4 lead mb-0">Track your projects, manage your supplies, and showcase your passion.</p>
+        </div>
+        <div class="mt-4">
+            <a href="{% url 'signup' %}" class="btn btn-primary btn-lg mx-2">Get Started for Free</a>
+            <a href="{% url 'login' %}" class="btn btn-secondary btn-lg mx-2 hero-login-btn">Log In</a>
+        </div>
     </div>
+</div>
+
+{# --- 2. Features Section --- #}
+<div class="container my-5 content-section">
+    <h2 class="text-center mb-5">Everything You Need to Stay Organized</h2>
+    <div class="row text-center">
+        <div class="col-md-4">
+            <i class="bi bi-journal-check" style="font-size: 3rem; color: var(--brand-teal);"></i>
+            <h3 class="mt-3">Track Projects</h3>
+            <p class="text-muted">Document every step of your creative process, from initial idea to completed masterpiece. Never lose track of your progress again.</p>
+        </div>
+        <div class="col-md-4">
+            <i class="bi bi-box-seam" style="font-size: 3rem; color: var(--brand-teal);"></i>
+            <h3 class="mt-3">Manage Inventory</h3>
+            <p class="text-muted">Keep a detailed list of all your supplies, parts, and tools. Know what you have and what you need at a glance.</p>
+        </div>
+        <div class="col-md-4">
+            <i class="bi bi-camera" style="font-size: 3rem; color: var(--brand-teal);"></i>
+            <h3 class="mt-3">Showcase Your Work</h3>
+            <p class="text-muted">With our premium photo galleries, you can create a beautiful portfolio of your finished projects to share and inspire.</p>
+        </div>
+    </div>
+</div>
+
+{# --- 3. Final Call to Action --- #}
+<div class="p-5 bg-white rounded-3 text-center shadow-sm">
+    <h2 class="fw-bold">Ready to Organize Your Passion?</h2>
+    <p class="lead">Stop juggling spreadsheets and notes. Start building a beautiful record of your craft today.</p>
+    <a href="{% url 'signup' %}" class="btn btn-primary btn-lg mt-3">Sign Up Now & Get Started</a>
 </div>
 {% endblock %}
