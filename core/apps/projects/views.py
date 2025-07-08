@@ -97,6 +97,11 @@ class InventoryItemCreateView(LoginRequiredMixin, CreateView):
     template_name = 'inventory/inventory_form.html'
     success_url = reverse_lazy('projects:inventory-list')
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
     def form_valid(self, form):
         form.instance.owner = self.request.user
         messages.success(self.request, "Inventory item added successfully!")
@@ -108,6 +113,11 @@ class InventoryItemUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'inventory/inventory_form.html'
     success_url = reverse_lazy('projects:inventory-list')
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
     def get_queryset(self):
         return InventoryItem.objects.filter(owner=self.request.user)
 
@@ -117,4 +127,4 @@ class InventoryItemDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('projects:inventory-list')
 
     def get_queryset(self):
-        return
+        return InventoryItem.objects.filter(owner=self.request.user)

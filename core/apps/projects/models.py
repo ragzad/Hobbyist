@@ -1,6 +1,16 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    icon_class = models.CharField(max_length=50, blank=True, default='bi-box')
+
+    class Meta:
+        verbose_name_plural = "Categories"
+
+    def __str__(self):
+        return self.name
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     is_premium = models.BooleanField(default=False)
@@ -30,22 +40,13 @@ class Project(models.Model):
 class InventoryItem(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='inventory_items')
     name = models.CharField(max_length=200)
-
-    # A DecimalField is more flexible for different types of quantities
     quantity = models.DecimalField(max_digits=10, decimal_places=2, default=1.00)
-    
-    # A CharField to let users define their own units
     unit_of_measurement = models.CharField(max_length=50, blank=True, help_text="e.g., pcs, g, ml, cm")
-
-    # A category field to help with organization
-    category = models.CharField(max_length=100, blank=True)
-
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
     notes = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        # Make the string representation more informative
         return f"{self.name} ({self.quantity} {self.unit_of_measurement})"
-
 # Add this new model
 class ProjectPhoto(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='photos')
