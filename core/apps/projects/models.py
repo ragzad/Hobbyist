@@ -12,6 +12,14 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+    
+class Folder(models.Model):
+    name = models.CharField(max_length=100)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='folders')
+    folder_type = models.CharField(max_length=20, default='project')
+
+    def __str__(self):
+        return self.name
 
 # --- PROJECT MODEL ---
 class Project(models.Model):
@@ -23,6 +31,8 @@ class Project(models.Model):
     required_inventory = models.ManyToManyField('InventoryItem', blank=True, related_name='projects')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    cover_image = models.ImageField(upload_to='project_covers/', null=True, blank=True)
+    folder = models.ForeignKey(Folder, on_delete=models.SET_NULL, null=True, blank=True, related_name='projects')
 
     def __str__(self):
         return self.name
@@ -35,6 +45,7 @@ class InventoryItem(models.Model):
     quantity = models.DecimalField(max_digits=10, decimal_places=2, default=1.00)
     unit_of_measurement = models.CharField(max_length=50, blank=True, help_text="e.g., pcs, g, ml, cm")
     cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    folder = models.ForeignKey(Folder, on_delete=models.SET_NULL, null=True, blank=True, related_name='inventory_items')
     notes = models.TextField(blank=True, null=True)
 
     def __str__(self):
@@ -65,6 +76,7 @@ class Task(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='TODO')
     due_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    image = models.ImageField(upload_to='task_attachments/', null=True, blank=True)
 
     def __str__(self):
         return self.title

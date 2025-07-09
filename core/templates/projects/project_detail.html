@@ -10,42 +10,66 @@
     </a>
 </div>
 
+<!-- Project Details & Inventory Card -->
 <div class="card mb-4 shadow-sm">
-    <div class="card-header">
-        Project Details
-    </div>
     <div class="card-body">
         <div class="row">
             <div class="col-md-8">
-                <h5>Description</h5>
-                <p>{{ project.description|linebreaksbr }}</p>
+                <h5><i class="bi bi-card-text me-2"></i>Description</h5>
+                <p>{{ project.description|linebreaksbr|default:"No description provided." }}</p>
+                
+                <h5 class="mt-4"><i class="bi bi-box-seam me-2"></i>Required Inventory</h5>
+                <ul class="list-group list-group-flush">
+                {% for item in project.required_inventory.all %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center ps-0">
+                        <div>
+                            <i class="{{ item.category.icon_class|default:'bi-box' }} me-2 text-muted"></i>
+                            {{ item.name }}
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light py-0 px-2" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'projects:inventory-update' item.pk %}"><i class="bi bi-pencil me-2"></i>Edit Item</a></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'projects:inventory-delete' item.pk %}"><i class="bi bi-trash me-2"></i>Delete Item</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-muted ps-0">No items required for this project.</li>
+                {% endfor %}
+                </ul>
             </div>
-            <div class="col-md-4 text-center">
-                <h5>Total Estimated Cost</h5>
-                <p class="display-6 fw-bold text-success">£{{ total_project_cost|floatformat:2 }}</p>
-                <small class="text-muted">Based on linked inventory items.</small>
+            <div class="col-md-4 text-center align-self-center">
+                <h5 class="text-muted">Total Estimated Cost</h5>
+                <p class="display-4 fw-bold text-success">£{{ total_project_cost|floatformat:2 }}</p>
             </div>
         </div>
     </div>
 </div>
 
-
+<!-- Kanban Board Columns -->
 <div class="row kanban-board">
+    <!-- To Do Column -->
     <div class="col-md-4">
-        <div class="card shadow-sm">
-            <div class="card-header bg-danger text-white">
-                <h4 class="mb-0">To Do</h4>
-            </div>
-            <div class="card-body bg-light kanban-column" id="todo-column" data-status="TODO">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-danger text-white"><h4 class="mb-0">To Do</h4></div>
+            <div class="card-body bg-light kanban-column" data-status="TODO">
                 {% for task in tasks_todo %}
-                <div class="card mb-2 task-card" id="task-{{ task.pk }}">
-                    <input type="hidden" name="task_id" value="{{ task.pk }}">
+                <div class="card mb-2 task-card" data-task-id="{{ task.pk }}">
+                    {% if task.image %}
+                        <img src="{{ task.image.url }}" class="card-img-top" alt="Task attachment">
+                    {% endif %}
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <p class="fw-bold mb-1">{{ task.title }}</p>
-                            <div>
-                                <a href="{% url 'projects:task-update' task.pk %}" class="btn btn-sm btn-outline-secondary py-0 px-1"><i class="bi bi-pencil"></i></a>
-                                <a href="{% url 'projects:task-delete' task.pk %}" class="btn btn-sm btn-outline-danger py-0 px-1"><i class="bi bi-trash"></i></a>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light py-0 px-1" type="button" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="{% url 'projects:task-update' task.pk %}"><i class="bi bi-pencil me-2"></i>Edit</a></li>
+                                    <li><a class="dropdown-item text-danger" href="{% url 'projects:task-delete' task.pk %}"><i class="bi bi-trash me-2"></i>Delete</a></li>
+                                </ul>
                             </div>
                         </div>
                         <p class="small text-muted mb-0">{{ task.description|truncatewords:10 }}</p>
@@ -57,62 +81,67 @@
             </div>
         </div>
     </div>
-
+    <!-- In Progress Column -->
     <div class="col-md-4">
-        <div class="card shadow-sm">
-            <div class="card-header bg-warning text-dark">
-                <h4 class="mb-0">In Progress</h4>
-            </div>
-            <div class="card-body bg-light kanban-column" id="inprogress-column" data-status="INPROGRESS">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-warning text-dark"><h4 class="mb-0">In Progress</h4></div>
+            <div class="card-body bg-light kanban-column" data-status="INPROGRESS">
                 {% for task in tasks_inprogress %}
-                <div class="card mb-2 task-card" id="task-{{ task.pk }}">
-                    <input type="hidden" name="task_id" value="{{ task.pk }}">
+                <div class="card mb-2 task-card" data-task-id="{{ task.pk }}">
+                    {% if task.image %}
+                        <img src="{{ task.image.url }}" class="card-img-top" alt="Task attachment">
+                    {% endif %}
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <p class="fw-bold mb-1">{{ task.title }}</p>
-                            <div>
-                                <a href="{% url 'projects:task-update' task.pk %}" class="btn btn-sm btn-outline-secondary py-0 px-1"><i class="bi bi-pencil"></i></a>
-                                <a href="{% url 'projects:task-delete' task.pk %}" class="btn btn-sm btn-outline-danger py-0 px-1"><i class="bi bi-trash"></i></a>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light py-0 px-1" type="button" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="{% url 'projects:task-update' task.pk %}"><i class="bi bi-pencil me-2"></i>Edit</a></li>
+                                    <li><a class="dropdown-item text-danger" href="{% url 'projects:task-delete' task.pk %}"><i class="bi bi-trash me-2"></i>Delete</a></li>
+                                </ul>
                             </div>
                         </div>
                         <p class="small text-muted mb-0">{{ task.description|truncatewords:10 }}</p>
                     </div>
                 </div>
                 {% empty %}
-                <p class="text-muted text-center p-3">Nothing in progress.</p>
                 {% endfor %}
             </div>
         </div>
     </div>
-
+    <!-- Done Column -->
     <div class="col-md-4">
-        <div class="card shadow-sm">
-            <div class="card-header bg-success text-white">
-                <h4 class="mb-0">Done</h4>
-            </div>
-            <div class="card-body bg-light kanban-column" id="done-column" data-status="DONE">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-success text-white"><h4 class="mb-0">Done</h4></div>
+            <div class="card-body bg-light kanban-column" data-status="DONE">
                 {% for task in tasks_done %}
-                <div class="card mb-2 task-card" id="task-{{ task.pk }}">
-                    <input type="hidden" name="task_id" value="{{ task.pk }}">
+                <div class="card mb-2 task-card" data-task-id="{{ task.pk }}">
+                    {% if task.image %}
+                        <img src="{{ task.image.url }}" class="card-img-top" alt="Task attachment">
+                    {% endif %}
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <p class="fw-bold mb-1 text-decoration-line-through">{{ task.title }}</p>
-                            <div>
-                                <a href="{% url 'projects:task-update' task.pk %}" class="btn btn-sm btn-outline-secondary py-0 px-1"><i class="bi bi-pencil"></i></a>
-                                <a href="{% url 'projects:task-delete' task.pk %}" class="btn btn-sm btn-outline-danger py-0 px-1"><i class="bi bi-trash"></i></a>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light py-0 px-1" type="button" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="{% url 'projects:task-update' task.pk %}"><i class="bi bi-pencil me-2"></i>Edit</a></li>
+                                    <li><a class="dropdown-item text-danger" href="{% url 'projects:task-delete' task.pk %}"><i class="bi bi-trash me-2"></i>Delete</a></li>
+                                </ul>
                             </div>
                         </div>
                         <p class="small text-muted mb-0">{{ task.description|truncatewords:10 }}</p>
                     </div>
                 </div>
                 {% empty %}
-                <p class="text-muted text-center p-3">No completed tasks.</p>
                 {% endfor %}
             </div>
         </div>
     </div>
 </div>
 
+<!-- Add Task Modal -->
 <div class="modal fade" id="newTaskModal" tabindex="-1" aria-labelledby="newTaskModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -120,14 +149,14 @@
         <h5 class="modal-title" id="newTaskModalLabel">Add a New Task</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form method="post">
+      <form method="post" enctype="multipart/form-data">
         <div class="modal-body">
             {% csrf_token %}
             {{ task_form.as_p }}
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-primary">Save Task</button>
+            <button type="submit" class="btn btn-primary" name="save_task">Save Task</button>
         </div>
       </form>
     </div>
@@ -154,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const taskElement = evt.item;
                 const toColumn = evt.to;
                 const newStatus = toColumn.dataset.status;
-                const taskId = taskElement.querySelector('input[type="hidden"]').value;
+                const taskId = taskElement.dataset.taskId;
 
                 let data = new FormData();
                 data.append('task_id', taskId);

@@ -5,35 +5,126 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>My Inventory</h1>
-    <a href="{% url 'projects:inventory-create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add New Item</a>
+    <div>
+        <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#newFolderModal"><i class="bi bi-folder-plus"></i> New Folder</button>
+        <a href="{% url 'projects:inventory-create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add New Item</a>
+    </div>
 </div>
 
-<div class="card">
-    <ul class="list-group list-group-flush">
-        {% for item in items %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center">
-                    <i class="{{ item.category.icon_class|default:'bi-box' }} me-3 fs-4 text-muted"></i>
-                    <div>
-                        <strong>{{ item.name }}</strong>
-                        {% if item.category %}
-                            <small class="text-muted d-block">Category: {{ item.category.name }}</small>
-                        {% endif %}
+<!-- Accordion for Folders -->
+<div class="accordion" id="inventoryFoldersAccordion">
+    {% for folder in folders %}
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="heading-{{ folder.pk }}">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ folder.pk }}">
+                <i class="bi bi-folder me-2"></i> {{ folder.name }}
+            </button>
+        </h2>
+        <div id="collapse-{{ folder.pk }}" class="accordion-collapse collapse show">
+            <div class="accordion-body inventory-dropzone list-group" data-folder-id="{{ folder.pk }}">
+                {% for item in folder.inventory_items.all %}
+                    <div class="list-group-item inventory-card d-flex justify-content-between align-items-center" data-item-id="{{ item.pk }}">
+                        <div class="d-flex align-items-center">
+                            <i class="{{ item.category.icon_class|default:'bi-box' }} me-3 fs-4 text-muted"></i>
+                            <div>
+                                <strong>{{ item.name }}</strong>
+                                <small class="text-muted d-block">Qty: {{ item.quantity|floatformat:"-2" }} {{ item.unit_of_measurement }}</small>
+                            </div>
+                        </div>
+                        <!-- Dropdown Menu for Actions -->
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light" type="button" id="dropdownMenuButton-item-{{ item.pk }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton-item-{{ item.pk }}">
+                                <li><a class="dropdown-item" href="{% url 'projects:inventory-update' item.pk %}"><i class="bi bi-pencil me-2"></i>Edit</a></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'projects:inventory-delete' item.pk %}"><i class="bi bi-trash me-2"></i>Delete</a></li>
+                            </ul>
+                        </div>
                     </div>
-                </div>
-                <div class="d-flex align-items-center">
-                    <span class="badge bg-primary rounded-pill me-3 fs-6">
-                        {{ item.quantity|floatformat:"-2" }} {{ item.unit_of_measurement }}
-                    </span>
-                    <div>
-                        <a href="{% url 'projects:inventory-update' item.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
-                        <a href="{% url 'projects:inventory-delete' item.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
-                    </div>
-                </div>
-            </li>
-        {% empty %}
-            <li class="list-group-item text-muted">Your inventory is empty. Add your first item using the button above!</li>
-        {% endfor %}
-    </ul>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %} <!-- This was the misplaced tag -->
 </div>
+
+<!-- Uncategorized Items -->
+<h3 class="mt-5">Uncategorized Items</h3>
+<div class="p-3 bg-light border rounded inventory-dropzone list-group" data-folder-id="None">
+    {% for item in unfoldered_items %}
+        <div class="list-group-item inventory-card d-flex justify-content-between align-items-center" data-item-id="{{ item.pk }}">
+            <div class="d-flex align-items-center">
+                <i class="{{ item.category.icon_class|default:'bi-box' }} me-2 fs-4 text-muted"></i>
+                <div>
+                    <strong>{{ item.name }}</strong>
+                    <small class="text-muted d-block">Qty: {{ item.quantity|floatformat:"-2" }} {{ item.unit_of_measurement }}</small>
+                </div>
+            </div>
+            <!-- Dropdown Menu for Actions -->
+            <div class="dropdown">
+                <button class="btn btn-sm btn-light" type="button" id="dropdownMenuButton-item-uncat-{{ item.pk }}" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-three-dots-vertical"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton-item-uncat-{{ item.pk }}">
+                    <li><a class="dropdown-item" href="{% url 'projects:inventory-update' item.pk %}"><i class="bi bi-pencil me-2"></i>Edit</a></li>
+                    <li><a class="dropdown-item text-danger" href="{% url 'projects:inventory-delete' item.pk %}"><i class="bi bi-trash me-2"></i>Delete</a></li>
+                </ul>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- New Folder Modal -->
+<div class="modal fade" id="newFolderModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Create New Inventory Folder</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="{% url 'projects:folder-create' %}" method="post">
+        <div class="modal-body">
+            {% csrf_token %}
+            <input type="hidden" name="folder_type" value="inventory">
+            <input type="text" name="folder_name" class="form-control" placeholder="Enter folder name..." required>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Create Folder</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.body.addEventListener('htmx:configRequest', function(evt) {
+    evt.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const dropzones = document.querySelectorAll('.inventory-dropzone');
+    
+    dropzones.forEach(zone => {
+        new Sortable(zone, {
+            group: 'inventory',
+            animation: 150,
+            onEnd: function (evt) {
+                const itemCard = evt.item;
+                const toZone = evt.to.closest('.inventory-dropzone');
+                
+                const itemId = itemCard.dataset.itemId;
+                const folderId = toZone.dataset.folderId;
+
+                htmx.ajax('POST', '{% url "projects:inventory-move" %}', {
+                    body: `item_id=${itemId}&folder_id=${folderId}`,
+                    swap: 'none'
+                });
+            }
+        });
+    });
+});
+</script>
 {% endblock %}
