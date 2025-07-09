@@ -1,13 +1,13 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.contrib import messages
-from django.db.models import Sum, F, Q
-from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
-from .models import Profile, Project, InventoryItem, ProjectPhoto, Category, Task
-from .forms import ProjectForm, PhotoUploadForm, InventoryItemForm, TaskForm
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Sum, Q
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
+from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
+from .models import Profile, Project, InventoryItem, ProjectPhoto, Category, Task, Folder
+from .forms import ProjectForm, PhotoUploadForm, InventoryItemForm, TaskForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # --- Homepage View ---
 class HomeView(TemplateView):
@@ -17,14 +17,13 @@ class HomeView(TemplateView):
 class ProjectListView(LoginRequiredMixin, ListView):
     model = Project
     template_name = 'projects/project_list.html'
-    context_object_name = 'projects'
 
-    def get_queryset(self):
-        queryset = super().get_queryset().filter(owner=self.request.user)
-        query = self.request.GET.get('q')
-        if query:
-            queryset = queryset.filter(Q(name__icontains=query) | Q(description__icontains=query))
-        return queryset
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context['folders'] = Folder.objects.filter(owner=user, folder_type='project')
+        context['unfoldered_projects'] = Project.objects.filter(owner=user, folder__isnull=True)
+        return context
 
 class ProjectDetailView(LoginRequiredMixin, DetailView):
     model = Project
@@ -37,56 +36,66 @@ class ProjectDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         project = self.get_object()
-        context['tasks_todo'] = project.tasks.filter(status='TODO')
-        context['tasks_inprogress'] = project.tasks.filter(status='INPROGRESS')
-        context['tasks_done'] = project.tasks.filter(status='DONE')
-        context['task_form'] = TaskForm()
+
+        # Cost Calculation
         total_cost_data = project.required_inventory.aggregate(total=Sum('cost'))
         total_cost = total_cost_data.get('total') or 0
         context['total_project_cost'] = total_cost
-        is_premium = Profile.objects.filter(user=self.request.user, is_premium=True).exists()
-        context['is_premium_user'] = is_premium
-        if is_premium:
-            context['photo_form'] = PhotoUploadForm()
+
+        # Kanban & Form Context
+        context['tasks_todo'] = project.tasks.filter(status='TODO')
+        context['tasks_inprogress'] = project.tasks.filter(status='INPROGRESS')
+        context['tasks_done'] = project.tasks.filter(status='DONE')
+        context['task_form'] = TaskForm(user=self.request.user)
+
         return context
 
     def post(self, request, *args, **kwargs):
-        form = TaskForm(request.POST)
-        if form.is_valid():
-            task = form.save(commit=False)
-            task.project = self.get_object()
-            task.save()
-            messages.success(request, "New task added to 'To Do'.")
-        else:
-            messages.error(request, "There was an error adding your task.")
+        if 'save_task' in request.POST:
+            form = TaskForm(request.POST, request.FILES, user=request.user)
+            if form.is_valid():
+                task = form.save(commit=False)
+                task.project = self.get_object()
+                task.save()
+                messages.success(request, "New task added to 'To Do'.")
+            else:
+                messages.error(request, "There was an error adding your task.")
         return redirect('projects:project-detail', pk=self.get_object().pk)
 
 class ProjectCreateView(LoginRequiredMixin, CreateView):
     model = Project
     form_class = ProjectForm
     template_name = 'projects/project_form.html'
-    success_url = reverse_lazy('projects:project-list')
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
+    
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['required_inventory'].queryset = InventoryItem.objects.filter(owner=self.request.user)
+        return form
 
     def form_valid(self, form):
-        form.instance.owner = self.request.user
+        project = form.save(commit=False)
+        project.owner = self.request.user
+        project.save()
+        form.save_m2m() 
         messages.success(self.request, "Project created successfully!")
-        return super().form_valid(form)
+        return redirect('projects:project-list')
 
 class ProjectUpdateView(LoginRequiredMixin, UpdateView):
     model = Project
     form_class = ProjectForm
     template_name = 'projects/project_form.html'
-    success_url = reverse_lazy('projects:project-list')
+    
+    def get_success_url(self):
+        return reverse_lazy('projects:project-detail', kwargs={'pk': self.object.pk})
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['required_inventory'].queryset = InventoryItem.objects.filter(owner=self.request.user)
+        return form
+
+    def form_valid(self, form):
+        messages.success(self.request, "Project updated successfully!")
+        return super().form_valid(form)
 
 class ProjectDeleteView(LoginRequiredMixin, DeleteView):
     model = Project
@@ -100,10 +109,13 @@ class ProjectDeleteView(LoginRequiredMixin, DeleteView):
 class InventoryListView(LoginRequiredMixin, ListView):
     model = InventoryItem
     template_name = 'inventory/inventory_list.html'
-    context_object_name = 'items'
 
-    def get_queryset(self):
-        return InventoryItem.objects.filter(owner=self.request.user)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context['folders'] = Folder.objects.filter(owner=user, folder_type='inventory')
+        context['unfoldered_items'] = InventoryItem.objects.filter(owner=user, folder__isnull=True)
+        return context
 
 class InventoryItemCreateView(LoginRequiredMixin, CreateView):
     model = InventoryItem
@@ -146,6 +158,11 @@ class TaskUpdateView(LoginRequiredMixin, UpdateView):
     form_class = TaskForm
     template_name = 'tasks/task_form.html'
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
     def get_queryset(self):
         return Task.objects.filter(project__owner=self.request.user)
 
@@ -161,19 +178,59 @@ class TaskDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return reverse_lazy('projects:project-detail', kwargs={'pk': self.object.project.pk})
-    
+
+# --- FOLDER & DRAG-DROP VIEWS ---
+@require_POST
+def create_folder(request):
+    folder_name = request.POST.get('folder_name')
+    folder_type = request.POST.get('folder_type', 'project')
+    if folder_name:
+        Folder.objects.create(name=folder_name, owner=request.user, folder_type=folder_type)
+    if folder_type == 'inventory':
+        return redirect('projects:inventory-list')
+    return redirect('projects:project-list')
+
+@require_POST
+def move_project_to_folder(request):
+    project_id = request.POST.get('project_id')
+    folder_id = request.POST.get('folder_id')
+    try:
+        project = Project.objects.get(pk=project_id, owner=request.user)
+        if folder_id == 'None':
+            project.folder = None
+        else:
+            folder = Folder.objects.get(pk=folder_id, owner=request.user)
+            project.folder = folder
+        project.save()
+        return HttpResponse(status=200)
+    except (Project.DoesNotExist, Folder.DoesNotExist):
+        return HttpResponse(status=404)
+
+@require_POST
+def move_inventory_item_to_folder(request):
+    item_id = request.POST.get('item_id')
+    folder_id = request.POST.get('folder_id')
+    try:
+        item = InventoryItem.objects.get(pk=item_id, owner=request.user)
+        if folder_id == 'None':
+            item.folder = None
+        else:
+            folder = Folder.objects.get(pk=folder_id, owner=request.user)
+            item.folder = folder
+        item.save()
+        return HttpResponse(status=200)
+    except (InventoryItem.DoesNotExist, Folder.DoesNotExist):
+        return HttpResponse(status=404)
+
 @require_POST
 def move_task(request):
     # This view is called by htmx when a task is moved
     task_id = request.POST.get('task_id')
     new_status = request.POST.get('new_status')
-    
     try:
         task = Task.objects.get(pk=task_id, project__owner=request.user)
         task.status = new_status
         task.save()
-        return HttpResponse(status=200) # Success
+        return HttpResponse(status=200)
     except Task.DoesNotExist:
-        return HttpResponse(status=404) # Not Found
-    except Exception as e:
-        return HttpResponse(status=500) # Server Error
+        return HttpResponse(status=404)

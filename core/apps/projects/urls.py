@@ -22,4 +22,9 @@ urlpatterns = [
     path('task/<int:pk>/update/', views.TaskUpdateView.as_view(), name='task-update'),
     path('task/<int:pk>/delete/', views.TaskDeleteView.as_view(), name='task-delete'),
     path('task/move/', views.move_task, name='task-move'),
+
+    # --- FOLDER URLS ---
+    path('folder/create/', views.create_folder, name='folder-create'),
+    path('project/move/', views.move_project_to_folder, name='project-move'),
+    path('inventory/move/', views.move_inventory_item_to_folder, name='inventory-move'),
 ]

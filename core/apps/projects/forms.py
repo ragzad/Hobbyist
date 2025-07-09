@@ -5,10 +5,23 @@ from .models import Project, InventoryItem, ProjectPhoto, Category, Task
 # --- PROJECT FORM ---
 class ProjectForm(forms.ModelForm):
     required_inventory = forms.ModelMultipleChoiceField(
-        queryset=InventoryItem.objects.none(),
+        queryset=InventoryItem.objects.all(),
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
+
+    class Meta:
+        model = Project
+        fields = ['name', 'description', 'status', 'cover_image', 'required_inventory']
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['required_inventory'].queryset = InventoryItem.objects.filter(owner=user)
+            # Hide the cover image field if the user is not premium
+            if not user.profile.is_premium:
+                self.fields['cover_image'].widget = forms.HiddenInput()
     class Meta:
         model = Project
         fields = ['name', 'description', 'status', 'required_inventory']
@@ -41,7 +54,13 @@ class InventoryItemForm(forms.ModelForm):
 class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        fields = ['title', 'description', 'due_date']
+        fields = ['title', 'description', 'due_date', 'image']
         widgets = {
             'due_date': forms.DateInput(attrs={'type': 'date'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user and not user.profile.is_premium:
+            self.fields['image'].widget = forms.HiddenInput()

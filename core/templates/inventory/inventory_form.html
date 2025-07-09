@@ -23,7 +23,7 @@
                                     </option>
                                 {% endfor %}
                             </select>
-                            <div class="form-text">Select an existing category. You can add new ones via the admin panel.</div>
+                            <div class="form-text">Select an existing category.</div>
 
                         {% elif 'textarea' in field.field.widget.template_name %}
                             <textarea name="{{ field.name }}" id="{{ field.id_for_label }}" class="form-control" rows="3">{{ field.value|default_if_none:'' }}</textarea>
