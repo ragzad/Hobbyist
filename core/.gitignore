@@ -16,7 +16,6 @@ venv/
 ENV/
 
 # Static files
-/static/
 /media/
 
 # IDE settings
