@@ -4,7 +4,10 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    sys.path.append(os.path.join(os.path.dirname(__file__), 'core', 'apps'))
+    project_root = os.path.dirname(os.path.abspath(__file__))
+
+    sys.path.insert(0, project_root)
+    sys.path.insert(0, os.path.join(project_root, 'core', 'apps'))
 
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings.production')
     try:
