@@ -1,187 +1,220 @@
-# The Hobbyist's Project & Inventory Tracker
+# Hobbyist: Project & Inventory Management App
 
-This project was built for my "Full Stack Frameworks with Django" module (L5 Diploma in Web Application Development). It's a full-stack web application designed from the ground up to be a useful, original tool for hobbyists.
+**Hobbyist** is a full-stack web application designed to provide makers, crafters, and hobbyists with a powerful and intuitive platform to manage their projects from concept to completion. It offers integrated tools for project planning, task management, inventory tracking, and cost calculation, all within a clean and responsive user interface.
 
-**Live Site:** [https://hobby-tracker-demo.herokuapp.com/](https://hobby-tracker-demo.herokuapp.com/) (Example URL)
-
----
-
-## 💡 Project Overview
-
-The Hobbyist's Project & Inventory Tracker is a web app for people who love making things—whether it's painting miniatures, building models, knitting, or tinkering with electronics.
-
-I noticed that many hobbyists use simple spreadsheets or notebooks to keep track of their projects and supplies. I wanted to build a dedicated, easy-to-use platform that makes this process much smoother. The app allows users to create an account, document all their ongoing projects, log their progress, and maintain a detailed inventory of all their parts and supplies.
-
-The goal was to create something that wasn't just another tutorial project, but a genuinely useful tool that solves a real-world problem for a specific community.
-
-### User Personas
-
-To make sure the app was practical, I designed it with two main types of users in mind:
-
-* **Alex, the Enthusiast:** An experienced hobbyist with lots of projects and a big collection of supplies. Alex needs a powerful way to stay organised and show off their finished work.
-* **Ben, the Beginner:** Someone new to a hobby, working on their first few projects. Ben needs a simple tool to track their progress and list the supplies they need to buy.
+- **Live Deployed Application:** [Link to live site]
+- **GitHub Repository:** [https://github.com/ragzad/Hobbyist]
 
 ---
 
-## ✨ Key Features
+## Table of Contents
 
-### Account Management
-* Users can create a secure account with an email and password.
-* Standard login and logout functionality.
-* The site shows different content to guests and logged-in users.
-
-![Screenshot of Login Page](https://i.imgur.com/your-screenshot-placeholder.png)
-
-### Project & Inventory Management (CRUD)
-* Authenticated users can **Create**, **Read**, **Update**, and **Delete** their own projects and inventory items.
-* A central dashboard lists all of a user's projects.
-* Each project has a detail page showing its description, status (e.g., 'In Progress', 'Completed'), and any required supplies.
-* A separate inventory page lists all supplies the user owns.
-
-![Screenshot of User Dashboard](https://i.imgur.com/your-screenshot-placeholder.png)
-
-### Premium Account Upgrade (E-Commerce)
-* Users can make a **one-time payment** using Stripe to upgrade to a "Premium" account.
-* The payment flow is secure and uses Stripe Webhooks to reliably update the user's account status after a successful payment.
-* Users see clear confirmation pages after their payment attempt.
-
-### Premium Features
-* As a proof-of-concept for the premium tier, upgraded users gain the ability to upload multiple photos to create a gallery for their completed projects.
-
----
-
-## 🏗️ Design and Data Modeling
-
-### UX Design & Wireframes
-
-My goal was a clean, intuitive, and accessible user experience. I focused on a few key principles:
-* **Consistency:** The navigation bar, colours, and button styles are the same across the entire site.
-* **Clear Hierarchy:** I used semantic HTML and clear headings to make the layout logical and easy to understand.
-* **User Feedback:** The app provides clear messages after important actions, like saving a form or deleting an item.
-* **Accessibility:** I paid attention to colour contrast and ensured all images have descriptive alt text.
-
-Before writing any code, I planned the main pages using low-fidelity wireframes in Balsamiq to focus on the layout and user flow.
-
-![Wireframe of the User Dashboard](https://i.imgur.com/your-wireframe-placeholder.png)
-
-### Data Model (Entity-Relationship Diagram)
-
-The application is built on a relational database. I designed a schema with several custom models to handle all the data. The main models are:
-
-* **Profile:** A one-to-one link with the built-in User model to store extra info, like whether the user is a premium member.
-* **Project:** Stores all the details for a single hobby project.
-* **InventoryItem:** Represents a single supply item a user owns.
-* **ProjectInventory:** A 'through' model to link projects and inventory items, allowing a user to specify how many of each item a project needs.
-
-This diagram shows how the models are related:
-
-![ERD of the Database Schema](https://i.imgur.com/your-erd-placeholder.png)
+1.  [Project Rationale & Purpose](#project-rationale--purpose)
+    -   [Target Audience](#target-audience)
+    -   [User Stories](#user-stories)
+2.  [UX Design Rationale](#ux-design-rationale)
+    -   [Information Hierarchy](#information-hierarchy)
+    -   [User Control & Interaction](#user-control--interaction)
+    -   [Consistency & Feedback](#consistency--feedback)
+    -   [Wireframes](#wireframes)
+3.  [Key Features](#key-features)
+4.  [Technology Stack](#technology-stack)
+    -   [Backend](#backend)
+    -   [Frontend](#frontend)
+    -   [Database](#database)
+    -   [Deployment](#deployment)
+5.  [Data Schema](#data-schema)
+    -   [Database ERD](#database-erd)
+    -   [Model Descriptions](#model-descriptions)
+6.  [Setup & Installation](#setup--installation)
+7.  [Running the Application](#running-the-application)
+    -   [Running Locally](#running-locally)
+    -   [Environment Variables](#environment-variables)
+8.  [Testing Procedures](#testing-procedures)
+9.  [Deployment Guide](#deployment-guide)
+10. [Credits & Attributions](#credits--attributions)
 
 ---
 
-## 🛠️ Technologies Used
+## Project Rationale & Purpose
 
-* **Backend:** Python, Django
-* **Frontend:** HTML, CSS, JavaScript
-* **Database:** PostgreSQL (Production), SQLite3 (Development)
-* **Deployment:** Heroku, Gunicorn
-* **Key Python Libraries:**
-    * `django-environ` (for managing environment variables)
-    * `Stripe` (for payment processing)
-    * `psycopg2-binary` (PostgreSQL adapter)
-    * `whitenoise` (for serving static files in production)
+Creative projects often involve numerous moving parts: ideas, tasks, materials, and costs. Keeping track of these elements can be chaotic, relying on scattered notebooks, spreadsheets, and disconnected apps. This disorganization can stifle creativity, lead to budget overruns, and make it difficult to replicate past successes.
+
+**Hobbyist** was created to solve this problem by providing a single, centralized hub for all project-related information. It empowers users to bring structure to their creative process, allowing them to focus on what they do best: creating.
+
+### Target Audience
+
+The application is designed for:
+
+* **DIY Enthusiasts:** Woodworkers, electronics tinkerers, and home improvement warriors.
+* **Crafters & Artisans:** Knitters, painters, jewelers, and model makers.
+* **Makers & Inventors:** Anyone building physical or digital products in a workshop or home lab.
+
+### User Stories
+
+* As a **new user**, I want to sign up for an account easily so I can start organizing my projects.
+* As a **logged-in user**, I want to create a new project, giving it a name, description, and cover image.
+* As a **project manager**, I want to add specific, actionable tasks to my projects to create a clear plan.
+* As an **organizer**, I want to sort my projects and tasks to prioritize my work effectively.
+* As a **budget-conscious maker**, I want to add items to a central inventory, track their costs, and assign them to projects to understand my total expenses.
+* As a **premium user**, I want to upgrade my account via a secure payment system to unlock advanced features.
 
 ---
 
-## 🚀 Running the Project Locally
+## UX Design Rationale
 
-To run this project on your own machine, follow these steps:
+The user experience is designed to be intuitive, efficient, and encouraging, adhering to core UX principles.
 
-1.  **Clone the repository:**
+### Information Hierarchy
+
+* **Semantic HTML:** The application uses semantic HTML5 tags (`<nav>`, `<main>`, `<header>`, `<section>`) to create a logical document structure, which is crucial for accessibility and SEO.
+* **Visual Priority:** Key information, such as project titles and task descriptions, is given prominence. Interactive elements like buttons and links are clearly styled and easily identifiable. The dashboard (Project List) provides an immediate, high-level overview of all ongoing work.
+* **Intuitive Navigation:** A persistent navigation bar provides access to core sections (Projects, Inventory, Profile) from anywhere in the app. The flow is logical: users start with a list of projects and can drill down into the details of a specific project, its tasks, and its associated inventory.
+
+### User Control & Interaction
+
+* **User-Initiated Actions:** The application avoids disruptive elements like pop-ups or auto-playing media. All actions, including creating, editing, and deleting data, are initiated by the user.
+* **Forgiving Design:** Destructive actions, such as deleting a project or task, require an explicit confirmation step, preventing accidental data loss.
+* **No Dead Ends:** All pages are linked logically. In the event of a 404 error, the user is presented with a clean error page with a clear link back to the main dashboard.
+
+### Consistency & Feedback
+
+* **Visual Consistency:** A consistent design language (colors, fonts, spacing, button styles) is used across all pages, ensuring a predictable and learnable interface.
+* **Immediate Feedback:** The interface, powered by **HTMX**, provides instant feedback for user actions. When a task is added, a project is updated, or an item is deleted, the UI updates immediately without a full page reload, confirming the action was successful.
+* **Clear Messaging:** The Django messaging framework is used to display clear success or error messages at the top of the page after significant actions (e.g., "Project created successfully!").
+
+### Wireframes
+
+*(In a real-world scenario, you would include images of your wireframes here to visually represent the UI/UX planning process.)*
+
+---
+
+## Key Features
+
+* **Full CRUD Functionality:** Create, Read, Update, and Delete operations for Projects, Tasks, and Inventory Items.
+* **User Authentication:** Secure user registration, login, and logout functionality. User-specific data access ensures privacy.
+* **Project & Task Management:** Create projects and add associated tasks. Tasks can be reordered via drag-and-drop.
+* **Inventory & Cost Tracking:** Manage a central inventory of materials. Assign inventory items to projects to automatically calculate total project costs.
+* **Subscription Payments:** Integration with **Stripe** for secure processing of subscription payments, including a webhook for automatic fulfillment.
+* **Interactive Frontend:** A dynamic user interface built with **HTMX** that allows for partial page updates, providing a smooth, app-like experience without complex JavaScript frameworks.
+
+---
+
+## Technology Stack
+
+### Backend
+
+* **Framework:** Django
+* **Language:** Python
+* **E-commerce:** Stripe API
+* **Web Server Gateway:** Gunicorn
+
+### Frontend
+
+* **Styling:** Bootstrap 5
+* **Interactivity:** HTMX
+* **UI Libraries:** Sortable.js (for drag-and-drop)
+
+### Database
+
+* **Development:** SQLite3
+* **Production:** PostgreSQL
+
+### Deployment
+
+* **Platform:** Heroku (or any similar PaaS)
+* **Static Files:** WhiteNoise
+
+---
+
+## Data Schema
+
+The application uses a relational database to store data across three primary apps: `users`, `projects`, and `payments`.
+
+### Database ERD
+
+*(In a real-world scenario, an image of the Entity-Relationship Diagram would be embedded here.)*
+
+### Model Descriptions
+
+#### `users` App
+
+* `User` (Django's built-in model)
+    * Stores standard user authentication details (username, password, email).
+* `Profile`
+    * **One-to-One with `User`:** Extends the user model.
+    * `is_pro`: BooleanField. Tracks if the user has an active premium subscription. Defaults to `False`.
+    * `stripe_customer_id`: CharField. Stores the unique customer ID from Stripe for managing subscriptions.
+
+#### `projects` App
+
+* `Folder`
+    * `name`: CharField. The name of the folder.
+    * `user`: ForeignKey to `User`. Each folder belongs to a specific user.
+* `Project`
+    * `user`: ForeignKey to `User`. The user who owns the project.
+    * `folder`: ForeignKey to `Folder`. The folder this project is organized into (optional).
+    * `title`, `description`, `cover_image`, `is_public`, `status`.
+    * **Method `get_total_cost()`:** Calculates and returns the total cost of all `InventoryItem`s associated with this project.
+* `Task`
+    * `project`: ForeignKey to `Project`. Each task is part of a single project.
+    * `title`, `notes`, `image`, `completed`, `order`.
+* `InventoryItem`
+    * `user`: ForeignKey to `User`. The user who owns the inventory item.
+    * `project`: ManyToManyField to `Project`. A single inventory item can be used in multiple projects.
+    * `folder`: ForeignKey to `Folder`. The folder this item is organized into (optional).
+    * `name`, `quantity`, `cost`.
+
+#### `payments` App
+
+* `StripeEvent`
+    * Stores a record of incoming webhook events from Stripe to prevent duplicate processing.
+    * `stripe_event_id`: CharField. The unique ID of the event from Stripe.
+
+---
+
+## Setup & Installation
+
+To run this project locally, follow these steps.
+
+1.  **Clone the Repository:**
     ```bash
-    git clone [https://github.com/your-username/hobby-tracker.git](https://github.com/your-username/hobby-tracker.git)
-    cd hobby-tracker
+    git clone [https://github.com/your-username/hobbyist.git](https://github.com/your-username/hobbyist.git)
+    cd hobbyist/core
     ```
 
-2.  **Create and activate a virtual environment:**
+2.  **Create a Virtual Environment:**
     ```bash
-    python -m venv .venv
-    # On Windows
-    .venv\Scripts\activate
-    # On macOS/Linux
-    source .venv/bin/activate
+    python -m venv venv
+    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
     ```
 
-3.  **Install the dependencies:**
+3.  **Install Dependencies:**
     ```bash
     pip install -r requirements.txt
     ```
 
-4.  **Set up your environment variables:**
-    * Create a new file named `.env` in the root directory.
-    * Copy the contents of `env.example` into your new `.env` file.
-    * Fill in the required values (you'll need your own `SECRET_KEY` and Stripe API keys).
+4.  **Set Up Environment Variables:**
+    -   Create a file named `.env` in the `core/` directory.
+    -   Add the required variables (see [Environment Variables](#environment-variables) section below).
 
-5.  **Run the database migrations:**
+5.  **Apply Database Migrations:**
     ```bash
     python manage.py migrate
     ```
 
-6.  **Start the development server:**
+6.  **Create a Superuser:**
     ```bash
-    python manage.py runserver
+    python manage.py createsuperuser
     ```
-    The application will be available at `http://127.0.0.1:8000/`.
 
 ---
 
-## 🧪 Testing
+## Running the Application
 
-I used Django's built-in testing framework to write unit tests for the application. The tests cover:
-* **Model methods:** Ensuring any custom logic on the models works correctly.
-* **View responses:** Checking that pages return the correct status codes (e.g., 200 for success, 404 for not found, 302 for redirects).
-* **Form validation:** Testing that forms correctly accept valid data and reject invalid data.
-* **Authentication:** Making sure protected pages correctly redirect non-authenticated users.
+### Running Locally
 
-| Function Implemented | Test Undertook | Screenshots |
-| :--- | :--- | :--- |
-| **User Login & Registration** | 1. **Sign Up:** Navigated to `/accounts/signup/`, created a new user, and verified successful redirection to the login page. <br> 2. **Login:** Logged in with the new user credentials and verified redirection to the project dashboard. <br> 3. **Logout:** Clicked the logout button and verified successful redirection back to the login page. <br> 4. **Access Control:** While logged out, attempted to access `/projects/` and was correctly redirected to the login page. | ![Login/Signup Flow](https://i.imgur.com/auth-flow-placeholder.png) |
-| **Stripe Payment Checkout** | 1. Navigated to the `/upgrade/` page and clicked the "Pay with Stripe" button. <br> 2. Verified redirection to the official Stripe checkout page. <br> 3. Used Stripe's dummy card number (4242...) to simulate a successful payment. <br> 4. Verified redirection to the `/upgrade/success/` page after payment. <br> 5. Tested the cancel flow and verified redirection to the `/upgrade/cancel/` page. | ![Stripe Checkout Flow](https://i.imgur.com/stripe-placeholder.png) |
-| **Premium Feature: Photo Upload** | 1. **Non-Premium User:** Verified that a standard user sees the "Upgrade to Premium" link and not the upload form. <br> 2. **Premium User:** Logged in as a premium user and navigated to a project detail page. <br> 3. **Form Visibility:** Verified that the photo upload form is visible. <br> 4. **File Upload:** Selected a valid image file and clicked "Upload Photo". <br> 5. **Verification:** Confirmed that the page reloaded and the new photo was displayed in the project gallery. | ![Photo Upload Form & Gallery](https://i.imgur.com/gallery-placeholder.png) |
-| | | |
-
-## 🧪 Automated Testing
-
-To ensure the application is robust and to prevent future changes from breaking existing functionality, I have implemented a suite of automated tests using Django's built-in testing framework.
-
-These tests are designed to run automatically and verify that the core components of the application behave as expected under different scenarios, including crucial security checks.
-
-### Tests Implemented
-
-The test suite for the `projects` app has been expanded to cover the full CRUD (Create, Read, Update, Delete) lifecycle and key security concerns:
-
-* **Model Representation:** Confirms that the `Project` model's string representation (`__str__`) works correctly.
-* **List View Logic:**
-    * Verifies that a logged-in user can see their own projects on the dashboard.
-    * Confirms that logged-out users are correctly redirected to the login page.
-* **Detail View Security:** A key security test that ensures a user can access the detail page for their own project but receives a **404 Not Found** error if they try to access a project belonging to another user.
-* **Create View Functionality:** Tests that a logged-in user can successfully submit the form to create a new project and that the new project is correctly saved to the database.
-
-### The Testing Process
-
-Initially, a test for the "Create View" failed because the test was not providing all the required data to the form. This is a perfect example of how testing helps catch bugs early.
-
-The initial test run showed a failure, as it did not account for the `status` field being required.
-
-![Initial Failing Test Run](Screenshots/Test2.png)
-
-After identifying the missing field in the test's payload, the test was amended.
-
-![Amended Passing Test Run](Screenshots/Test2Amended.png)
-
-### Running the Tests
-
-To run the full test suite, execute the following command from the project's root directory:
+Once the setup is complete, you can start the development server:
 
 ```bash
-python manage.py test
+python manage.py runserver

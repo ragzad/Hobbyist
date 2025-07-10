@@ -1,76 +1,143 @@
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.urls import reverse
-from .models import Project
 
-class ProjectCRUDTests(TestCase):
+from .models import Project, Task, InventoryItem
+from .forms import ProjectForm
+
+
+class ProjectModelTest(TestCase):
+    """
+    Tests for the Project, Task, and InventoryItem models.
+    """
 
     def setUp(self):
-        """
-        This method runs before every single test function.
-        We create two different users and a project for each one.
-        """
-        self.user1 = User.objects.create_user(username='user1', password='password123')
-        self.project1 = Project.objects.create(
-            owner=self.user1,
-            name='User 1s Project',
-            description='A test description.'
+        """Set up test users and data."""
+        self.user1 = User.objects.create_user(
+            username='user1', password='password123'
+        )
+        self.user2 = User.objects.create_user(
+            username='user2', password='password123'
+        )
+        self.project = Project.objects.create(user=self.user1, title='Test Project 1')
+        self.item1 = InventoryItem.objects.create(
+            user=self.user1, name='Wood', cost=10.50
+        )
+        self.item2 = InventoryItem.objects.create(
+            user=self.user1, name='Screws', cost=5.00
+        )
+        self.project.inventory.add(self.item1, self.item2)
+
+    def test_project_creation(self):
+        """Test that a project is created correctly."""
+        self.assertEqual(self.project.title, 'Test Project 1')
+        self.assertEqual(self.project.user, self.user1)
+
+    def test_get_total_cost(self):
+        """Test the project's total cost calculation method."""
+        self.assertEqual(self.project.get_total_cost(), 15.50)
+
+    def test_task_ordering(self):
+        """Test that tasks are ordered correctly."""
+        Task.objects.create(project=self.project, title='Task 2', order=1)
+        Task.objects.create(project=self.project, title='Task 1', order=0)
+        tasks = self.project.tasks.all()
+        self.assertEqual(tasks[0].title, 'Task 1')
+        self.assertEqual(tasks[1].title, 'Task 2')
+
+
+class ProjectViewsTest(TestCase):
+    """
+    Tests for the views in the 'projects' app.
+    """
+    def setUp(self):
+        """Set up test users, data, and a logged-in client."""
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.other_user = User.objects.create_user(username='otheruser', password='password')
+        self.client = Client()
+        self.client.login(username='testuser', password='password')
+
+        self.project = Project.objects.create(user=self.user, title='My Test Project')
+        self.other_project = Project.objects.create(
+            user=self.other_user, title="Other User's Project"
         )
 
-        self.user2 = User.objects.create_user(username='user2', password='password123')
-        self.project2 = Project.objects.create(
-            owner=self.user2,
-            name='User 2s Project'
-        )
-
-    def test_project_model_str(self):
-        """Test the __str__ method of the Project model."""
-        self.assertEqual(str(self.project1), 'User 1s Project')
-
-    def test_project_list_view_for_logged_in_user(self):
-        """Test that a logged-in user can only see their own projects."""
-        self.client.login(username='user1', password='password123')
-        response = self.client.get(reverse('projects:project-list'))
-        
+    def test_project_list_view(self):
+        """Test that the project list shows only the user's projects."""
+        response = self.client.get(reverse('project-list'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.project1.name)
-        self.assertNotContains(response, self.project2.name) # Crucial security check
+        self.assertTemplateUsed(response, 'projects/project_list.html')
+        self.assertContains(response, self.project.title)
+        self.assertNotContains(response, self.other_project.title)
 
-    def test_project_list_view_for_logged_out_user(self):
-        """Test that a logged-out user is redirected to the login page."""
-        response = self.client.get(reverse('projects:project-list'))
-        self.assertEqual(response.status_code, 302)
-        # Check that the redirection is to the login page
-        self.assertRedirects(response, '/accounts/login/?next=/projects/')
-
-    def test_project_detail_view_security(self):
-        """
-        Test that a user can see their own project's detail page,
-        but gets a 404 Not Found error for another user's project.
-        """
-        self.client.login(username='user1', password='password123')
-        
-        # User 1 tries to access their own project (should work)
-        url_own = reverse('projects:project-detail', args=[self.project1.pk])
-        response_own = self.client.get(url_own)
+    def test_project_detail_view_permissions(self):
+        """Test that a user can only view their own project details."""
+        # Test access to own project
+        response_own = self.client.get(reverse('project-detail', args=[self.project.pk]))
         self.assertEqual(response_own.status_code, 200)
-        
-        # User 1 tries to access User 2's project (should fail with 404)
-        url_other = reverse('projects:project-detail', args=[self.project2.pk])
-        response_other = self.client.get(url_other)
-        self.assertEqual(response_other.status_code, 404)
+        self.assertContains(response_own, self.project.title)
+
+        # Test access to other's project (should fail test_func -> 403 Forbidden)
+        response_other = self.client.get(reverse('project-detail', args=[self.other_project.pk]))
+        self.assertEqual(response_other.status_code, 403)
 
     def test_project_create_view(self):
-        """Test that a user can successfully create a new project."""
-        self.client.login(username='user1', password='password123')
-        url = reverse('projects:project-create')
-        post_data = {'name': 'Newest Project', 'description': 'From a test.', 'status': 'IN_PROGRESS'}
-        
-        response = self.client.post(url, post_data)
-        
-        # Should redirect to the project list on success
-        self.assertEqual(response.status_code, 302) 
-        self.assertRedirects(response, reverse('projects:project-list'))
-        
-        # Verify the project was actually created in the database
-        self.assertTrue(Project.objects.filter(name='Newest Project').exists())
+        """Test the creation of a new project."""
+        response = self.client.post(reverse('project-create'), {
+            'title': 'New Created Project',
+            'description': 'A description.'
+        })
+        self.assertEqual(response.status_code, 302) # Redirects on success
+        self.assertTrue(Project.objects.filter(title='New Created Project').exists())
+        new_project = Project.objects.get(title='New Created Project')
+        self.assertEqual(new_project.user, self.user)
+
+    def test_project_update_view_permissions(self):
+        """Test that a user can only update their own projects."""
+        response = self.client.post(reverse('project-update', args=[self.project.pk]), {
+            'title': 'Updated Title',
+            'description': self.project.description
+        })
+        self.assertEqual(response.status_code, 302) # Redirect
+        self.project.refresh_from_db()
+        self.assertEqual(self.project.title, 'Updated Title')
+
+        # Try to update other user's project
+        response_other = self.client.post(reverse('project-update', args=[self.other_project.pk]), {
+            'title': 'Malicious Update'
+        })
+        self.assertEqual(response_other.status_code, 403) # Forbidden
+
+    def test_project_delete_view(self):
+        """Test the deletion of a project."""
+        response = self.client.post(reverse('project-delete', args=[self.project.pk]))
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Project.objects.filter(pk=self.project.pk).exists())
+
+
+class TaskHtmxViewsTest(TestCase):
+    """
+    Tests for the HTMX-based task views.
+    """
+    def setUp(self):
+        self.user = User.objects.create_user(username='htmxuser', password='password')
+        self.client = Client()
+        self.client.login(username='htmxuser', password='password')
+        self.project = Project.objects.create(user=self.user, title='HTMX Project')
+
+    def test_add_task(self):
+        """Test adding a task via HTMX."""
+        url = reverse('add-task', args=[self.project.pk])
+        response = self.client.post(url, {'title': 'New HTMX Task'})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(Task.objects.filter(title='New HTMX Task').exists())
+        self.assertTemplateUsed(response, 'tasks/partials/task_item.html')
+
+    def test_delete_task(self):
+        """Test deleting a task via HTMX."""
+        task = Task.objects.create(project=self.project, title='Task to delete')
+        url = reverse('delete-task', args=[task.pk])
+        # Note: HTMX delete requests are sent as DELETE method
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Task.objects.filter(pk=task.pk).exists())
