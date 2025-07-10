@@ -4,9 +4,15 @@ import sys
 
 def main():
     """Run administrative tasks."""
+    # Get the absolute path to the directory containing manage.py (project root)
     base_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Add the 'outer core' directory to sys.path.
     sys.path.insert(0, os.path.join(base_dir, 'core'))
+
+    # Add the 'apps' directory within 'core' to sys.path.
     sys.path.insert(0, os.path.join(base_dir, 'core', 'apps'))
+
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings.production')
     try:
         from django.core.management import execute_from_command_line
