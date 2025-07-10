@@ -11,7 +11,7 @@
                 {% csrf_token %}
                 {{ form.as_p }}
 
-                {% if user.profile.is_premium %}
+                {% if profile.is_premium %}
                     <div class="mb-3">
                     <label for="id_image" class="form-label">Image</label>
                     {{ form.image }}
