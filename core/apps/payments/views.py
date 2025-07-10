@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from apps.projects.models import Profile
+from apps.users.models import Profile
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -90,3 +90,33 @@ def stripe_webhook(request):
 
     # Passed signature verification
     return HttpResponse(status=200)
+
+def create_premium_checkout_session(request):
+    session = stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        line_items=[{
+            'price_data': {
+                'currency': 'usd',
+                'product_data': {
+                    'name': 'Hobbyist Premium',
+                },
+                'unit_amount': 999, # This is $9.99
+            },
+            'quantity': 1,
+        }],
+        mode='payment',
+        success_url=request.build_absolute_uri(reverse('payments:premium-success')),
+        cancel_url=request.build_absolute_uri(reverse('payments:premium-cancel')),
+        client_reference_id=request.user.id
+    )
+    return redirect(session.url, code=303)
+
+def premium_success(request):
+    # This is where you update the user's profile
+    user = request.user
+    user.profile.is_premium = True
+    user.profile.save()
+    return render(request, 'payments/payment_success.html')
+
+def premium_cancel(request):
+    return render(request, 'payments/payment_cancel.html')

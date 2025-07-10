@@ -9,28 +9,20 @@
             <h1 class="text-center mb-4">Edit Task</h1>
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
-                
-                {{ form.title.label_tag }}
-                {{ form.title }}
-                <br><br>
-                {{ form.description.label_tag }}
-                {{ form.description }}
-                <br><br>
-                {{ form.due_date.label_tag }}
-                {{ form.due_date }}
-                <br><br>
+                {{ form.as_p }}
 
-                {% if request.user.profile.is_premium %}
+                {% if user.profile.is_premium %}
                     <div class="mb-3">
-                        <label for="{{ form.image.id_for_label }}" class="form-label">Attach Image (Premium)</label>
-                        {{ form.image }}
+                    <label for="id_image" class="form-label">Image</label>
+                    {{ form.image }}
+                    <div class="form-text">Attach an image to this task (Premium feature).</div>
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning">
+                    <a href="{% url 'payments:create-premium-checkout-session' %}">Upgrade to Premium</a> to attach images to your tasks.
                     </div>
                 {% endif %}
-
-                <div class="d-grid mt-3">
-                    <button type="submit" class="btn btn-primary btn-lg">Save Changes</button>
-                    <a href="{% url 'projects:project-detail' object.project.pk %}" class="btn btn-secondary mt-2">Cancel</a>
-                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
             </form>
         </div>
     </div>
