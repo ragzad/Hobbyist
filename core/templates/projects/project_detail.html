@@ -173,7 +173,7 @@ document.body.addEventListener('htmx:configRequest', function(evt) {
 
 document.addEventListener('DOMContentLoaded', function () {
     const columns = document.querySelectorAll('.kanban-column');
-    
+
     columns.forEach(column => {
         new Sortable(column, {
             group: 'kanban',
@@ -185,13 +185,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 const newStatus = toColumn.dataset.status;
                 const taskId = taskElement.dataset.taskId;
 
-                let data = new FormData();
-                data.append('task_id', taskId);
-                data.append('new_status', newStatus);
-                
+
                 htmx.ajax('POST', '{% url "projects:task-move" %}', {
-                    body: data,
-                    swap: 'none'
+                    values: {
+                        task_id: taskId,
+                        new_status: newStatus
+                    },
+                    swap: 'none' 
                 });
             }
         });
