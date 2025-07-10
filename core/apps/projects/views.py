@@ -5,7 +5,7 @@ from django.db.models import Sum, Q
 from django.http import HttpResponse, Http404, HttpResponseNotAllowed
 from django.views.decorators.http import require_POST
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
-from .models import Profile, Project, InventoryItem, ProjectPhoto, Category, Task, Folder
+from .models import Project, InventoryItem, ProjectPhoto, Category, Task, Folder
 from .forms import ProjectForm, PhotoUploadForm, InventoryItemForm, TaskForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 import logging

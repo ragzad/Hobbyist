@@ -52,12 +52,6 @@ class InventoryItem(models.Model):
         return f"{self.name} ({self.quantity} {self.unit_of_measurement})"
 
 # --- OTHER MODELS ---
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    is_premium = models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.user.username
 
 class ProjectPhoto(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='photos')
