@@ -4,11 +4,9 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    project_root = os.path.dirname(os.path.abspath(__file__))
-
-    sys.path.insert(0, project_root)
-    sys.path.insert(0, os.path.join(project_root, 'core', 'apps'))
-
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    sys.path.insert(0, os.path.join(base_dir, 'core'))
+    sys.path.insert(0, os.path.join(base_dir, 'core', 'apps'))
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings.production')
     try:
         from django.core.management import execute_from_command_line

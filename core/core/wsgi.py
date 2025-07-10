@@ -11,11 +11,11 @@ import os
 import sys
 from django.core.wsgi import get_wsgi_application
 
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+outer_core_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-sys.path.insert(0, project_root)
+sys.path.insert(0, outer_core_dir)
 
-sys.path.insert(0, os.path.join(project_root, 'core', 'apps'))
+sys.path.insert(0, os.path.join(outer_core_dir, 'apps'))
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings.production')
 
