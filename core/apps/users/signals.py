@@ -5,16 +5,10 @@ from django.dispatch import receiver
 from .models import Profile
 
 @receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
+def create_or_update_user_profile(sender, instance, created, **kwargs):
     """
-    Listen for a new user being created and make a Profile for them.
+    Create a profile for a new user, or just save the profile for an existing user.
     """
     if created:
         Profile.objects.create(user=instance)
-
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    """
-    Save the profile whenever the user object is saved.
-    """
     instance.profile.save()
