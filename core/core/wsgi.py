@@ -1,4 +1,3 @@
-# core/core/wsgi.py
 """
 WSGI config for core project.
 
@@ -18,6 +17,6 @@ sys.path.insert(0, outer_core_dir)
 
 sys.path.insert(0, os.path.join(outer_core_dir, 'apps'))
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings.production')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.core.settings")
 
 application = get_wsgi_application()

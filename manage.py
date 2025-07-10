@@ -13,7 +13,7 @@ def main():
     # Add the 'apps' directory within 'core' to sys.path.
     sys.path.insert(0, os.path.join(base_dir, 'core', 'apps'))
 
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings.production')
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.core.settings")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
