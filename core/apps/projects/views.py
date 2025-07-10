@@ -1,13 +1,16 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404 
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.db.models import Sum, Q
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404, HttpResponseNotAllowed
 from django.views.decorators.http import require_POST
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Profile, Project, InventoryItem, ProjectPhoto, Category, Task, Folder
 from .forms import ProjectForm, PhotoUploadForm, InventoryItemForm, TaskForm
 from django.contrib.auth.mixins import LoginRequiredMixin
+import logging
+
+logger = logging.getLogger(__name__)
 
 # --- Homepage View ---
 class HomeView(TemplateView):
@@ -224,13 +227,37 @@ def move_inventory_item_to_folder(request):
 
 @require_POST
 def move_task(request):
-    # This view is called by htmx when a task is moved
     task_id = request.POST.get('task_id')
-    new_status = request.POST.get('new_status')
+    new_project_id = request.POST.get('new_project_id')
+
+    print(f"DEBUG: move_task - task_id: {task_id}, new_project_id: {new_project_id}, user: {request.user.username}")
+
+    if not task_id or not new_project_id:
+        messages.error(request, "Missing task ID or new project ID for task move.")
+        return redirect('projects:project-list')
+
     try:
-        task = Task.objects.get(pk=task_id, project__owner=request.user)
-        task.status = new_status
-        task.save()
-        return HttpResponse(status=200)
+        task = get_object_or_404(Task, pk=task_id, project__owner=request.user)
+        new_project = get_object_or_404(Project, pk=new_project_id, owner=request.user)
+
+        if task.project != new_project:
+            task.project = new_project
+            task.save() 
+            messages.success(request, f"Task '{task.title}' moved successfully to project '{new_project.name}'.")
+        else:
+            messages.info(request, f"Task '{task.title}' is already in project '{new_project.name}'. No change made.")
+
+        return redirect('projects:project-detail', pk=new_project_id)
+
     except Task.DoesNotExist:
-        return HttpResponse(status=404)
+        messages.error(request, "Task not found or you don't have permission to move it.")
+        return redirect('projects:project-list')
+    except Project.DoesNotExist:
+        messages.error(request, "Target project not found or you don't have permission to move task to it.")
+        return redirect('projects:project-list') 
+    except Exception as e:
+        messages.error(request, f"An unexpected error occurred while moving the task: {e}")
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.exception("Error in move_task view:")
+        return redirect('projects:project-list') 
