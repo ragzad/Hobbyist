@@ -1,3 +1,4 @@
+# hobbyist/Hobbyist-Refactoring-and-polish/core/core/wsgi.py
 """
 WSGI config for core project.
 
@@ -11,7 +12,7 @@ import os
 import sys
 from django.core.wsgi import get_wsgi_application
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'core'))
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'apps'))
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings.production')
 
