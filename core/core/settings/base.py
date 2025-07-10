@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
 
-    # Local apps (no 'apps.' prefix needed now)
+    # Local apps 
     'users',
     'projects',
     'payments',
