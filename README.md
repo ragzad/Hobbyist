@@ -38,7 +38,7 @@ To make sure the app was practical, I designed it with two main types of users i
 * Each project has a detail page showing its description, status (e.g., 'In Progress', 'Completed'), and any required supplies.
 * A separate inventory page lists all supplies the user owns.
 
-![Screenshot of User Dashboard](https://i.imgur.com/your-screenshot-placeholder.png)
+![Screenshot of User Dashboard](/Screenshots/UserDashboard.jpg)
 
 ### Premium Account Upgrade (E-Commerce)
 * Users can make a **one-time payment** using Stripe to upgrade to a "Premium" account.
@@ -62,7 +62,7 @@ My goal was a clean, intuitive, and accessible user experience. I focused on a f
 
 Before writing any code, I planned the main pages using low-fidelity wireframes in Balsamiq to focus on the layout and user flow.
 
-![Wireframe of the User Dashboard](https://i.imgur.com/your-wireframe-placeholder.png)
+![Wireframe of the User Dashboard](/Screenshots/Wireframe.jpg)
 
 ### Data Model (Entity-Relationship Diagram)
 
@@ -75,7 +75,7 @@ The application is built on a relational database. I designed a schema with seve
 
 This diagram shows how the models are related:
 
-![ERD of the Database Schema](https://i.imgur.com/your-erd-placeholder.png)
+![ERD of the Database Schema](/Screenshots/ERD.jpg)
 
 ---
 
@@ -99,7 +99,7 @@ To run this project on your own machine, follow these steps:
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/your-username/hobby-tracker.git](https://github.com/your-username/hobby-tracker.git)
+    git clone [https://github.com/ragzad/hobby-tracker.git](https://github.com/ragzad/hobby-tracker.git)
     cd hobby-tracker
     ```
 
