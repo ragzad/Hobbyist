@@ -228,36 +228,24 @@ def move_inventory_item_to_folder(request):
 @require_POST
 def move_task(request):
     task_id = request.POST.get('task_id')
-    new_project_id = request.POST.get('new_project_id')
+    new_status = request.POST.get('new_status') 
 
-    print(f"DEBUG: move_task - task_id: {task_id}, new_project_id: {new_project_id}, user: {request.user.username}")
-
-    if not task_id or not new_project_id:
-        messages.error(request, "Missing task ID or new project ID for task move.")
-        return redirect('projects:project-list')
+    if not task_id or not new_status:
+        messages.error(request, "Missing task ID or new status for task move.")
+        return HttpResponse(status=400)
 
     try:
         task = get_object_or_404(Task, pk=task_id, project__owner=request.user)
-        new_project = get_object_or_404(Project, pk=new_project_id, owner=request.user)
 
-        if task.project != new_project:
-            task.project = new_project
-            task.save() 
-            messages.success(request, f"Task '{task.title}' moved successfully to project '{new_project.name}'.")
-        else:
-            messages.info(request, f"Task '{task.title}' is already in project '{new_project.name}'. No change made.")
-
-        return redirect('projects:project-detail', pk=new_project_id)
+        # Update the task's status
+        task.status = new_status
+        task.save()
+        return HttpResponse(status=200)
 
     except Task.DoesNotExist:
         messages.error(request, "Task not found or you don't have permission to move it.")
-        return redirect('projects:project-list')
-    except Project.DoesNotExist:
-        messages.error(request, "Target project not found or you don't have permission to move task to it.")
-        return redirect('projects:project-list') 
+        return HttpResponse(status=404)
     except Exception as e:
         messages.error(request, f"An unexpected error occurred while moving the task: {e}")
-        import logging
-        logger = logging.getLogger(__name__)
         logger.exception("Error in move_task view:")
-        return redirect('projects:project-list') 
+        return HttpResponse(status=500)
