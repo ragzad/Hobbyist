@@ -30,7 +30,7 @@ To make sure the app was practical, I designed it with two main types of users i
 * Standard login and logout functionality.
 * The site shows different content to guests and logged-in users.
 
-![Screenshot of Login Page](https://i.imgur.com/your-screenshot-placeholder.png)
+![Screenshot of Login Page](/Screenshots/Loginpage.jpg)
 
 ### Project & Inventory Management (CRUD)
 * Authenticated users can **Create**, **Read**, **Update**, and **Delete** their own projects and inventory items.
