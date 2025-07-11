@@ -99,7 +99,7 @@ To run this project on your own machine, follow these steps:
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/ragzad/hobby-tracker.git](https://github.com/ragzad/hobby-tracker.git)
+    git clone [https://github.com/ragzad/Hobbyist.git](https://github.com/ragzad/Hobbyist.git)
     cd hobby-tracker
     ```
 
@@ -145,9 +145,9 @@ I used Django's built-in testing framework to write unit tests for the applicati
 
 | Function Implemented | Test Undertook | Screenshots |
 | :--- | :--- | :--- |
-| **User Login & Registration** | 1. **Sign Up:** Navigated to `/accounts/signup/`, created a new user, and verified successful redirection to the login page. <br> 2. **Login:** Logged in with the new user credentials and verified redirection to the project dashboard. <br> 3. **Logout:** Clicked the logout button and verified successful redirection back to the login page. <br> 4. **Access Control:** While logged out, attempted to access `/projects/` and was correctly redirected to the login page. | ![Login/Signup Flow](https://i.imgur.com/auth-flow-placeholder.png) |
-| **Stripe Payment Checkout** | 1. Navigated to the `/upgrade/` page and clicked the "Pay with Stripe" button. <br> 2. Verified redirection to the official Stripe checkout page. <br> 3. Used Stripe's dummy card number (4242...) to simulate a successful payment. <br> 4. Verified redirection to the `/upgrade/success/` page after payment. <br> 5. Tested the cancel flow and verified redirection to the `/upgrade/cancel/` page. | ![Stripe Checkout Flow](https://i.imgur.com/stripe-placeholder.png) |
-| **Premium Feature: Photo Upload** | 1. **Non-Premium User:** Verified that a standard user sees the "Upgrade to Premium" link and not the upload form. <br> 2. **Premium User:** Logged in as a premium user and navigated to a project detail page. <br> 3. **Form Visibility:** Verified that the photo upload form is visible. <br> 4. **File Upload:** Selected a valid image file and clicked "Upload Photo". <br> 5. **Verification:** Confirmed that the page reloaded and the new photo was displayed in the project gallery. | ![Photo Upload Form & Gallery](https://i.imgur.com/gallery-placeholder.png) |
+| **User Login & Registration** | 1. **Sign Up:** Navigated to `/accounts/signup/`, created a new user, and verified successful redirection to the login page. <br> 2. **Login:** Logged in with the new user credentials and verified redirection to the project dashboard. <br> 3. **Logout:** Clicked the logout button and verified successful redirection back to the login page. <br> 4. **Access Control:** While logged out, attempted to access `/projects/` and was correctly redirected to the login page. | ![Login/Signup Flow](/Screenshots/Loginpage.jpg) |
+| **Stripe Payment Checkout** | 1. Navigated to the `/upgrade/` page and clicked the "Pay with Stripe" button. <br> 2. Verified redirection to the official Stripe checkout page. <br> 3. Used Stripe's dummy card number (4242...) to simulate a successful payment. <br> 4. Verified redirection to the `/upgrade/success/` page after payment. <br> 5. Tested the cancel flow and verified redirection to the `/upgrade/cancel/` page. | ![Stripe Checkout Flow](/Screenshots/Stripe.png) |
+| **Premium Feature: Photo Upload** | 1. **Non-Premium User:** Verified that a standard user sees the "Upgrade to Premium" link and not the upload form. <br> 2. **Premium User:** Logged in as a premium user and navigated to a project detail page. <br> 3. **Form Visibility:** Verified that the photo upload form is visible. <br> 4. **File Upload:** Selected a valid image file and clicked "Upload Photo". <br> 5. **Verification:** Confirmed that the page reloaded and the new photo was displayed in the project gallery. | ![Photo Upload Form & Gallery](/Screenshots/Imageupload.jpg) |
 | | | |
 
 ## 🧪 Automated Testing
