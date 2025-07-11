@@ -2,7 +2,7 @@
 
 This project was built for my "Full Stack Frameworks with Django" module (L5 Diploma in Web Application Development). It's a full-stack web application designed from the ground up to be a useful, original tool for hobbyists.
 
-**Live Site:** [https://hobby-tracker-demo.herokuapp.com/](https://hobby-tracker-demo.herokuapp.com/) (Example URL)
+**Live Site:** [https://hobb-5e258a5700a4.herokuapp.com/](https://hobb-5e258a5700a4.herokuapp.com/) (Example URL)
 
 ---
 
